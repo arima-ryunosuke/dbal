@@ -364,11 +364,13 @@ class Comparator
             if (count($candidateIndexes) === 1) {
                 list($removedIndex, $addedIndex) = $candidateIndexes[0];
 
-                $removedIndexName = strtolower($removedIndex->getName());
-                $addedIndexName = strtolower($addedIndex->getName());
+                $originalRemovedIndexName = $removedIndex->getName();
 
-                if (! isset($tableDifferences->renamedIndexes[$removedIndexName])) {
-                    $tableDifferences->renamedIndexes[$removedIndexName] = $addedIndex;
+                if (! isset($tableDifferences->renamedIndexes[$originalRemovedIndexName])) {
+                    $tableDifferences->renamedIndexes[$originalRemovedIndexName] = $addedIndex;
+
+                    $removedIndexName = strtolower($removedIndex->getName());
+                    $addedIndexName = strtolower($addedIndex->getName());
                     unset($tableDifferences->addedIndexes[$addedIndexName]);
                     unset($tableDifferences->removedIndexes[$removedIndexName]);
                 }

@@ -604,6 +604,22 @@ class ComparatorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($tableDiff);
     }
 
+    public function testCompareIndexCompareCaseInsensitive()
+    {
+        $tableA = new Table("foo");
+        $tableA->addColumn('id', 'integer');
+        $tableA->addIndex(array('id'), 'UPPERCASE_INDEX_NAME');
+
+        $tableB = new Table("foo");
+        $tableB->addColumn('id', 'integer');
+        $tableB->addIndex(array('id'), 'lowercase_indexname');
+
+        $c = new Comparator();
+        $tableDiff = $c->diffTable($tableA, $tableB);
+
+        $this->assertEquals(array('UPPERCASE_INDEX_NAME'), array_keys($tableDiff->renamedIndexes));
+    }
+
     public function testCompareIndexBasedOnPropertiesNotName()
     {
         $tableA = new Table("foo");
