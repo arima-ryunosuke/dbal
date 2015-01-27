@@ -311,6 +311,22 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         $this->assertEquals('LONGBLOB', $this->_platform->getBlobTypeDeclarationSQL(array()));
     }
 
+    public function testAlterTableOption()
+    {
+        $table = new Table('alter_table_option');
+        
+        $diffTable  = clone $table;
+        $diffTable->addOption('engine', 'engine-name');
+        $diffTable->addOption('row_format', 'row_format-name');
+
+        $comparator = new Comparator();
+
+        $this->assertEquals(
+            array('ALTER TABLE alter_table_option ENGINE engine-name ROW_FORMAT row_format-name'),
+            $this->_platform->getAlterTableSQL($comparator->diffTable($table, $diffTable))
+        );
+    }
+
     /**
      * @group DBAL-400
      */

@@ -2755,6 +2755,29 @@ abstract class AbstractPlatform
     }
 
     /**
+     * @param string      $table
+     * @param string|null $database
+     *
+     * @return string
+     *
+     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     */
+    public function getListTableOptionsSQL($table, $database = null)
+    {
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
+     * @return string
+     *
+     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     */
+    public function getDefaultTableOptionSQL()
+    {
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
      * @return string
      *
      * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
@@ -3123,6 +3146,16 @@ abstract class AbstractPlatform
      * @return boolean
      */
     public function supportsSchemas()
+    {
+        return false;
+    }
+
+    /**
+     * Whether the platform supports table option.
+     *
+     * @return boolean
+     */
+    public function supportsTableOption()
     {
         return false;
     }
