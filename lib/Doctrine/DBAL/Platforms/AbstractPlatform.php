@@ -2220,6 +2220,10 @@ abstract class AbstractPlatform
             $columnDef .= " COMMENT " . $this->quoteStringLiteral($field['comment']);
         }
 
+        if ($this->supportsColumnPosition() && isset($field['position']) && $field['position'] !== '') {
+            $columnDef .= " " . $field['position'];
+        }
+
         return $name . ' ' . $columnDef;
     }
 
@@ -3279,6 +3283,16 @@ abstract class AbstractPlatform
      * @return boolean
      */
     public function supportsColumnCollation()
+    {
+        return false;
+    }
+
+    /**
+     * Does this platform support column position? for ALTER TABLE ADD COLUMN.
+     *
+     * @return boolean
+     */
+    public function supportsColumnPosition()
     {
         return false;
     }

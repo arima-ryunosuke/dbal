@@ -210,12 +210,21 @@ class Comparator
         $table1Columns = $table1->getColumns();
         $table2Columns = $table2->getColumns();
 
+        end($table2Columns);
+        $table2lastColumnName = key($table2Columns);
+
         /* See if all the fields in table 1 exist in table 2 */
         foreach ($table2Columns as $columnName => $column) {
             if ( !$table1->hasColumn($columnName)) {
                 $tableDifferences->addedColumns[$columnName] = $column;
+                // except last element. (because last element has no effect for "AFTER")
+                if ($columnName !== $table2lastColumnName)
+                {
+                    $tableDifferences->addedColumnPositions[$columnName] = isset($prevColumn) ? $prevColumn : false;
+                }
                 $changes++;
             }
+            $prevColumn = $column;
         }
         /* See if there are any removed fields in table 2 */
         foreach ($table1Columns as $columnName => $column) {
