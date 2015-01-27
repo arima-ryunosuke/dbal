@@ -8,6 +8,7 @@ use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Schema;
 
 abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 {
@@ -461,12 +462,12 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
     public function testAddAutoIncrementPrimaryKey()
     {
         $keyTable = new Table("foo");
-        $keyTable->addColumn("id", "integer", array('autoincrement' => true));
-        $keyTable->addColumn("baz", "string");
+        $keyTable->addColumn("id", "integer", array('autoincrement' => true))->setPlatformOption('beforeColumn', null);
+        $keyTable->addColumn("baz", "string")->setPlatformOption('beforeColumn', 'id');
         $keyTable->setPrimaryKey(array("id"));
 
         $oldTable = new Table("foo");
-        $oldTable->addColumn("baz", "string");
+        $oldTable->addColumn("baz", "string")->setPlatformOption('beforeColumn', null);
 
         $c = new \Doctrine\DBAL\Schema\Comparator;
         $diff = $c->diffTable($oldTable, $keyTable);
@@ -474,7 +475,29 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         $sql = $this->_platform->getAlterTableSQL($diff);
 
         $this->assertEquals(array(
-            "ALTER TABLE foo ADD id INT AUTO_INCREMENT NOT NULL, ADD PRIMARY KEY (id)",
+            "ALTER TABLE foo ADD id INT AUTO_INCREMENT NOT NULL FIRST, ADD PRIMARY KEY (id)",
+        ), $sql);
+    }
+
+    public function testColumnPosition()
+    {
+        $oldSchema = new Schema();
+
+        $tableFoo = $oldSchema->createTable('foo');
+        $tableFoo->addColumn('c2', 'integer')->setPlatformOption('beforeColumn', null);
+
+        $newSchema = new Schema();
+        $table = $newSchema->createTable('foo');
+        $table->addColumn('c1', 'integer')->setPlatformOption('beforeColumn', null);
+        $table->addColumn('c2', 'integer')->setPlatformOption('beforeColumn', 'c1');
+        $table->addColumn('c3', 'integer')->setPlatformOption('beforeColumn', 'c2');
+        $table->addColumn('c4', 'integer')->setPlatformOption('beforeColumn', 'c3');
+
+        $diff = Comparator::compareSchemas($oldSchema, $newSchema);
+        $sql = $this->_platform->getAlterTableSQL($diff->changedTables['foo']);
+
+        $this->assertEquals(array(
+            "ALTER TABLE foo ADD c1 INT NOT NULL FIRST, ADD c3 INT NOT NULL AFTER c2, ADD c4 INT NOT NULL AFTER c3",
         ), $sql);
     }
 
