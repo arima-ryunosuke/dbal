@@ -242,6 +242,10 @@ class SchemaManagerFunctionalTestCase extends \Doctrine\Tests\DbalFunctionalTest
         $table->addColumn('baz3', 'date');
         $table->setPrimaryKey(array('id'));
 
+        foreach($this->_sm->getDefaultTableOption() as $name => $value) {
+            $table->addOption($name, $value);
+        }
+
         return $table;
     }
 

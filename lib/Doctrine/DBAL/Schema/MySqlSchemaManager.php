@@ -65,6 +65,15 @@ class MySqlSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
+    protected function _getPortableTableOptions($options)
+    {
+        // return first row array
+        return reset($options);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function _getPortableUserDefinition($user)
     {
         return [

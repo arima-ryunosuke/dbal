@@ -123,6 +123,13 @@ class TableDiff
     public $fromTable;
 
     /**
+     * All changed options
+     *
+     * @var array
+     */
+    public $changedOptions = array();
+
+    /**
      * Constructs an TableDiff object.
      *
      * @param string                             $tableName

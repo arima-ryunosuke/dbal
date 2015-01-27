@@ -305,6 +305,11 @@ class Comparator
             $changes++;
         }
 
+        $tableDifferences->changedOptions = array_diff_assoc($table2->getOptions(), $table1->getOptions());
+        if ($tableDifferences->changedOptions) {
+            $changes++;
+        }
+
         return $changes ? $tableDifferences : false;
     }
 
