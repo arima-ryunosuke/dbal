@@ -223,6 +223,33 @@ abstract class AbstractSchemaManager
     }
 
     /**
+     * @param string $tableName
+     *
+     * @return array
+     */
+    public function listTableOptions($tableName)
+    {
+        $tableOptions = array();
+        if($this->_platform->supportsTableOption()) {
+            $sql = $this->_platform->getListTableOptionsSQL($tableName, $this->_conn->getDatabase());
+            $tableOptions = $this->_conn->fetchAll($sql);
+        }
+
+        return $this->_getPortableTableOptions($tableOptions);
+    }
+    
+    public function getDefaultTableOption()
+    {
+        $defaultOptions = array();
+        if($this->_platform->supportsTableOption()) {
+            $sql = $this->_platform->getDefaultTableOptionSQL();
+            $defaultOptions = $this->_conn->fetchAssoc($sql);
+        }
+
+        return $defaultOptions;
+    }
+
+    /**
      * Filters asset names if they are configured to return only a subset of all
      * the found elements.
      *
@@ -285,7 +312,9 @@ abstract class AbstractSchemaManager
         }
         $indexes = $this->listTableIndexes($tableName);
 
-        return new Table($tableName, $columns, $indexes, $foreignKeys, false, array());
+        $options = $this->listTableOptions($tableName);
+
+        return new Table($tableName, $columns, $indexes, $foreignKeys, false, $options);
     }
 
     /**
@@ -922,6 +951,16 @@ abstract class AbstractSchemaManager
     protected function _getPortableTableDefinition($table)
     {
         return $table;
+    }
+
+    /**
+     * @param array $options
+     *
+     * @return mixed
+     */
+    protected function _getPortableTableOptions($options)
+    {
+        return $options;
     }
 
     /**

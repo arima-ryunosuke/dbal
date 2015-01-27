@@ -267,6 +267,9 @@ class MySqlSchemaManagerTest extends SchemaManagerFunctionalTestCase
     {
         $offlineTable = new Table('list_guid_table_column');
         $offlineTable->addColumn('col_guid', 'guid');
+        foreach($this->_sm->getDefaultTableOption() as $name => $value) {
+            $offlineTable->addOption($name, $value);
+        }
 
         $this->_sm->dropAndCreateTable($offlineTable);
 
