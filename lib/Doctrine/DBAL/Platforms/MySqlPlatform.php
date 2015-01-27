@@ -380,6 +380,14 @@ class MySqlPlatform extends AbstractPlatform
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsColumnPosition()
+    {
+        return true;
+    }
+
     public function getListTablesSQL()
     {
         return "SHOW FULL TABLES WHERE Table_type = 'BASE TABLE'";
@@ -565,13 +573,14 @@ class MySqlPlatform extends AbstractPlatform
             $queryParts[] = 'RENAME TO ' . $diff->getNewName()->getQuotedName($this);
         }
 
-        foreach ($diff->addedColumns as $column) {
+        foreach ($diff->addedColumns as $name => $column) {
             if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
                 continue;
             }
 
             $columnArray = $column->toArray();
             $columnArray['comment'] = $this->getColumnComment($column);
+            $columnArray['position'] = $this->buildColumnPosition($name, $diff->addedColumnPositions);
             $queryParts[] = 'ADD ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
         }
 
@@ -655,6 +664,33 @@ class MySqlPlatform extends AbstractPlatform
         }
 
         return array_merge($sql, $tableSql, $columnSql);
+    }
+
+    /**
+     * Build SQL for column position
+     *
+     * @param string $name
+     * @param \Doctrine\DBAL\Schema\Column[] $addedColumnPositions
+     *
+     * @return string
+     */
+    private function buildColumnPosition($name, $addedColumnPositions)
+    {
+        // for ComparatorTest. (ComparatorTest is not set $addedColumnPositions)
+        if (! isset($addedColumnPositions[$name])) {
+            return null;
+        }
+        
+        $last = end($addedColumnPositions);
+        
+        $posCol = $addedColumnPositions[$name];
+        // FALSE means first column
+        if ($posCol === false) {
+            return "FIRST";
+        } else {
+            return "AFTER " . $posCol->getQuotedName($this);
+        }
+        return null;
     }
 
     /**
