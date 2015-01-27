@@ -169,6 +169,32 @@ class MySqlPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
+    public function getListTableOptionsSQL($table, $database = null)
+    {
+        if ($database) {
+            $database = "'" . $database . "'";
+        } else {
+            $database = 'DATABASE()';
+        }
+
+        return "
+            SELECT ENGINE AS `engine`, ROW_FORMAT as `row_format`, TABLE_COLLATION AS `collate`, TABLE_COMMENT AS `comment`
+            FROM information_schema.tables
+            WHERE TABLE_SCHEMA = $database AND TABLE_NAME = '$table'
+        ";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getDefaultTableOptionSQL()
+    {
+        return 'SELECT @@default_storage_engine AS `engine`, "Compact" AS `row_format`, @@collation_database AS `collate`, "" AS `comment`';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getListViewsSQL($database)
     {
         $database = $this->quoteStringLiteral($database);
@@ -336,6 +362,14 @@ class MySqlPlatform extends AbstractPlatform
      * MySql supports this through AUTO_INCREMENT columns.
      */
     public function supportsIdentityColumns()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsTableOption()
     {
         return true;
     }
@@ -605,8 +639,29 @@ class MySqlPlatform extends AbstractPlatform
         $tableSql = array();
 
         if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
-            if (count($queryParts) > 0) {
-                $sql[] = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this) . ' ' . implode(", ", $queryParts);
+            if (count($queryParts) > 0 || $diff->changedOptions) {
+                $query = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this);
+
+                if (count($queryParts) > 0) {
+                    $query .= ' ' . implode(", ", $queryParts);
+                }
+
+                if ($diff->changedOptions) {
+                    $optionsql = array();
+                    foreach ($diff->changedOptions as $name => $option) {
+                        $name = strtoupper($name);
+                        if ($name === 'COMMENT') {
+                            $option = $this->quoteStringLiteral($option);
+                        }
+                        $optionsql[] = $name . ' ' . $option;
+                    }
+                    if (count($queryParts) > 0) {
+                        $query .= ',';
+                    }
+                    $query .= ' ' . implode(' ', $optionsql);
+                }
+
+                $sql[] = $query;
             }
             $sql = array_merge(
                 $this->getPreAlterTableIndexForeignKeySQL($diff),
