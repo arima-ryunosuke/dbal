@@ -118,6 +118,11 @@ class TableDiff
     public $removedForeignKeys = array();
 
     /**
+     * @var \Doctrine\DBAL\Schema\Column[]
+     */
+    public $addedColumnPositions = array();
+
+    /**
      * @var \Doctrine\DBAL\Schema\Table
      */
     public $fromTable;
