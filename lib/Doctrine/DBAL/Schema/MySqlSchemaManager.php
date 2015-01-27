@@ -216,6 +216,10 @@ class MySqlSchemaManager extends AbstractSchemaManager
             $column->setPlatformOption('collation', $tableColumn['collation']);
         }
 
+        if (isset($tableColumn['beforecolumn'])) {
+            $column->setPlatformOption('beforeColumn', $tableColumn['beforecolumn']);
+        }
+
         return $column;
     }
 
