@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Doctrine DBAL
 
 Powerful database abstraction layer with many features for database schema introspection, schema management and PDO abstraction.
@@ -12,3 +13,58 @@ Powerful database abstraction layer with many features for database schema intro
 * [Documentation](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/)
 * [Issue Tracker](http://www.doctrine-project.org/jira/browse/DBAL)
 * [Downloads](http://github.com/doctrine/dbal/downloads)
+
+## Forked
+
+from [doctrine/dbal](https://github.com/doctrine/dbal).
+
+This forked repository has specialized mysql when comparing.
+
+- support TINYTEXT / TEXT / MEDIUMTEXT / LONGTEXT types when alter column type
+- support FIRST / AFTER suffix when add column
+- support TABLE OPTION (e.g. ROW_FORMAT, ENGINE etc) when create table, alter table
+- support SPATIAL types (e.g. POINT, GEOMETRY etc)
+- fix UPPERCASE index name when rename index
+
+### example:
+
+```sql
+-- from table
+CREATE TABLE ExampleTable (
+  id INT(10) UNSIGNED NOT NULL,
+  seq INT(10) UNSIGNED NOT NULL,
+  content TEXT NOT NULL COLLATE utf8_bin,
+  PRIMARY KEY (id),
+  INDEX INDEX1 (seq)
+) Comment='comment_from' CHARSET=utf8 COLLATE='utf8_general_ci' ENGINE=InnoDB;
+
+-- to table
+CREATE TABLE ExampleTable (
+  id INT(10) UNSIGNED NOT NULL,
+  seq INT(10) UNSIGNED NOT NULL,
+  name VARCHAR(64) NOT NULL,
+  content MEDIUMTEXT NOT NULL COLLATE utf8_bin,
+  PRIMARY KEY (id),
+  INDEX INDEX2 (seq)
+) Comment='comment_to' CHARSET=utf8 COLLATE='utf8_bin' ENGINE=MyISAM;
+```
+
+```sql
+-- original comparing
+ALTER TABLE ExampleTable
+  ADD name VARCHAR(64) NOT NULL COLLATE utf8_bin
+DROP INDEX index1 ON ExampleTable
+CREATE INDEX INDEX2 ON ExampleTable (
+  seq
+)
+
+-- forked comparing
+ALTER TABLE ExampleTable
+  ADD name VARCHAR(64) NOT NULL COLLATE utf8_bin AFTER seq,
+  CHANGE content content MEDIUMTEXT NOT NULL COLLATE utf8_bin,
+  ENGINE MyISAM COLLATE utf8_bin COMMENT 'comment_to'
+DROP INDEX INDEX1 ON ExampleTable
+CREATE INDEX INDEX2 ON ExampleTable (
+  seq
+)
+```
