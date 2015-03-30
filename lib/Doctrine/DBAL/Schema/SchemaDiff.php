@@ -138,6 +138,72 @@ class SchemaDiff
 
     /**
      * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
+     * @param array of included regexes                 $includes
+     * @param array of excluded regexes                 $excludes
+     *
+     * @return array
+     */
+    public function toFilterSql(AbstractPlatform $platform, $includes = array(), $excludes = array())
+    {
+        $filter = function($string, $includes, $excludes) {
+            // skip to not contain include tables
+            $flag = count($includes) > 0;
+            foreach ($includes as $include) {
+                foreach (array_map('trim', explode(',', $include)) as $regex) {
+                    if (preg_match("@$regex@i", $string)) {
+                        $flag = false;
+                        break;
+                    }
+                }
+            }
+            if ($flag) {
+                return 1;
+            }
+            
+            // skip to contain exclude tables
+            foreach ($excludes as $exclude) {
+                foreach (array_map('trim', explode(',', $exclude)) as $regex) {
+                    if (preg_match("@$regex@i", $string)) {
+                        return 2;
+                    }
+                }
+            }
+            
+            return 0;
+        };
+
+        foreach ($this->newTables as $name => $table)
+        {
+            $filterdResult = $filter($name, $includes, $excludes);
+            if ($filterdResult > 0)
+            {
+                unset($this->newTables[$name]);
+            }
+        }
+
+        foreach ($this->changedTables as $name => $table)
+        {
+            $filterdResult = $filter($name, $includes, $excludes);
+            if ($filterdResult > 0)
+            {
+                unset($this->changedTables[$name]);
+            }
+        }
+
+        foreach ($this->removedTables as $name => $table)
+        {
+            $filterdResult = $filter($name, $includes, $excludes);
+            if ($filterdResult > 0)
+            {
+                unset($this->removedTables[$name]);
+            }
+        }
+
+        return $this->_toSql($platform, false);
+    }
+
+    /**
+     * @param \Doctrine\DBAL\Platforms\AbstractPlatform $platform
      * @param boolean                                   $saveMode
      *
      * @return array
