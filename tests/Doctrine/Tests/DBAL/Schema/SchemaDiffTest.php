@@ -33,6 +33,18 @@ class SchemaDiffTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $sql);
     }
 
+    public function testSchemaDiffToFilterSql()
+    {
+        $diff = $this->createSchemaDiff();
+        $platform = $this->createPlatform(false);
+
+        $sql = $diff->toFilterSql($platform, array('foo', 'bar', 'baz'), array('bar'));
+
+        $expected = array('create_schema', null, 'alter_seq', null, 'create_seq', 'create_table', 'create_foreign_key', 'alter_table');
+
+        $this->assertEquals($expected, $sql);
+    }
+
     public function createPlatform($unsafe = false)
     {
         $platform = $this->getMock('Doctrine\Tests\DBAL\Mocks\MockPlatform');
