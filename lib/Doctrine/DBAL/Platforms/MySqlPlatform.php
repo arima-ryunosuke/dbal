@@ -178,7 +178,7 @@ class MySqlPlatform extends AbstractPlatform
         }
 
         return "
-            SELECT ENGINE AS `engine`, ROW_FORMAT as `row_format`, TABLE_COLLATION AS `collate`, QUOTE(TABLE_COMMENT) AS `comment`
+            SELECT ENGINE AS `engine`, ROW_FORMAT as `row_format`, TABLE_COLLATION AS `collate`, TABLE_COMMENT AS `comment`
             FROM information_schema.tables
             WHERE TABLE_SCHEMA = $database AND TABLE_NAME = '$table'
         ";
@@ -189,7 +189,7 @@ class MySqlPlatform extends AbstractPlatform
      */
     public function getDefaultTableOptionSQL()
     {
-        return 'SELECT @@default_storage_engine AS `engine`, "Compact" AS `row_format`, @@collation_database AS `collate`, QUOTE("") AS `comment';
+        return 'SELECT @@default_storage_engine AS `engine`, "Compact" AS `row_format`, @@collation_database AS `collate`, "" AS `comment`';
     }
 
     /**
@@ -658,9 +658,13 @@ class MySqlPlatform extends AbstractPlatform
                 if ($diff->changedOptions) {
                     $optionsql = array();
                     foreach ($diff->changedOptions as $name => $option) {
-                        $optionsql[] = strtoupper($name) . ' ' . $option;
+                        $name = strtoupper($name);
+                        if ($name === 'COMMENT') {
+                            $option = $this->quoteStringLiteral($option);
+                        }
+                        $optionsql[] = $name . ' ' . $option;
                     }
-                    if(count($queryParts) > 0) {
+                    if (count($queryParts) > 0) {
                         $query .= ',';
                     }
                     $query .= ' ' . implode(' ', $optionsql);

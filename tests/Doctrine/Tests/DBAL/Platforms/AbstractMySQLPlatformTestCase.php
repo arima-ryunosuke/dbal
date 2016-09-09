@@ -319,11 +319,12 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         $diffTable  = clone $table;
         $diffTable->addOption('engine', 'engine-name');
         $diffTable->addOption('row_format', 'row_format-name');
+        $diffTable->addOption('comment', 'comment-text');
 
         $comparator = new Comparator();
 
         $this->assertEquals(
-            array('ALTER TABLE alter_table_option ENGINE engine-name ROW_FORMAT row_format-name'),
+            array('ALTER TABLE alter_table_option ENGINE engine-name ROW_FORMAT row_format-name COMMENT \'comment-text\''),
             $this->_platform->getAlterTableSQL($comparator->diffTable($table, $diffTable))
         );
     }
