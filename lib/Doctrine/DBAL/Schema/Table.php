@@ -635,7 +635,7 @@ class Table extends AbstractAsset
             $primaryKeyColumns = $this->filterColumns($this->getPrimaryKey()->getColumns());
         }
 
-        return array_merge($primaryKeyColumns, $this->getForeignKeyColumns(), $this->_columns);
+        return array_merge($primaryKeyColumns, $this->_columns);
     }
 
     /**
