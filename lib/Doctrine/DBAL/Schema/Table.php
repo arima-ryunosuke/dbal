@@ -623,16 +623,11 @@ class Table extends AbstractAsset
         $columns = $this->_columns;
 
         $pkCols = array();
-        $fkCols = array();
 
         if ($this->hasPrimaryKey()) {
             $pkCols = $this->getPrimaryKey()->getColumns();
         }
-        foreach ($this->getForeignKeys() as $fk) {
-            /* @var $fk ForeignKeyConstraint */
-            $fkCols = array_merge($fkCols, $fk->getColumns());
-        }
-        $colNames = array_unique(array_merge($pkCols, $fkCols, array_keys($columns)));
+        $colNames = array_unique(array_merge($pkCols, array_keys($columns)));
 
         uksort($columns, function ($a, $b) use ($colNames) {
             return (array_search($a, $colNames) >= array_search($b, $colNames));
