@@ -485,6 +485,7 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
 
         $tableFoo = $oldSchema->createTable('foo');
         $tableFoo->addColumn('c2', 'integer')->setPlatformOption('beforeColumn', null);
+        $tableFoo->addColumn('c9', 'integer')->setPlatformOption('beforeColumn', null);
 
         $newSchema = new Schema();
         $table = $newSchema->createTable('foo');
@@ -492,12 +493,13 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         $table->addColumn('c2', 'integer')->setPlatformOption('beforeColumn', 'c1');
         $table->addColumn('c3', 'integer')->setPlatformOption('beforeColumn', 'c2');
         $table->addColumn('c4', 'integer')->setPlatformOption('beforeColumn', 'c3');
+        $table->addColumn('c9', 'string')->setPlatformOption('beforeColumn', 'c4');
 
         $diff = Comparator::compareSchemas($oldSchema, $newSchema);
         $sql = $this->_platform->getAlterTableSQL($diff->changedTables['foo']);
 
         $this->assertEquals(array(
-            "ALTER TABLE foo ADD c1 INT NOT NULL FIRST, ADD c3 INT NOT NULL AFTER c2, ADD c4 INT NOT NULL AFTER c3",
+            "ALTER TABLE foo ADD c1 INT NOT NULL FIRST, ADD c3 INT NOT NULL AFTER c2, ADD c4 INT NOT NULL AFTER c3, CHANGE c9 c9 VARCHAR(255) NOT NULL AFTER c4",
         ), $sql);
     }
 

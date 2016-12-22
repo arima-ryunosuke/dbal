@@ -639,8 +639,16 @@ class MySqlPlatform extends AbstractPlatform
             }
 
             $columnArray['comment'] = $this->getColumnComment($column);
-            $queryParts[] =  'CHANGE ' . ($columnDiff->getOldColumnName()->getQuotedName($this)) . ' '
+            $query =  'CHANGE ' . ($columnDiff->getOldColumnName()->getQuotedName($this)) . ' '
                     . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
+            if (array_key_exists('beforeColumn', $columnArray)) {
+                if ($columnArray['beforeColumn']) {
+                    $query .= " AFTER " . $columnArray['beforeColumn'];
+                } else {
+                    $query .= " FIRST";
+                }
+            }
+            $queryParts[] = $query;
         }
 
         foreach ($diff->renamedColumns as $oldColumnName => $column) {
