@@ -551,7 +551,7 @@ class Table extends AbstractAsset
             "idx",
             $this->_getMaxIdentifierLength()
         );
-        $indexCandidate = $this->_createIndex($constraint->getColumns(), $indexName, false, false);
+        $indexCandidate = $this->_createIndex($constraint->getColumns(), $indexName, false, false, array('implicit'));
 
         foreach ($this->_indexes as $existingIndex) {
             if ($indexCandidate->isFullfilledBy($existingIndex)) {
