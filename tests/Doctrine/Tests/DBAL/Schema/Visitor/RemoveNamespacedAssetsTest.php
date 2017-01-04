@@ -16,7 +16,7 @@ class RemoveNamespacedAssetsTest extends \PHPUnit_Framework_TestCase
     {
         $config = new SchemaConfig;
         $config->setName("test");
-        $schema = new Schema(array(), array(), $config);
+        $schema = new Schema(array(), array(), array(), $config);
 
         $schema->createTable("test.test");
         $schema->createTable("foo.bar");
@@ -35,7 +35,7 @@ class RemoveNamespacedAssetsTest extends \PHPUnit_Framework_TestCase
     {
         $config = new SchemaConfig;
         $config->setName("test");
-        $schema = new Schema(array(), array(), $config);
+        $schema = new Schema(array(), array(), array(), $config);
 
         $fooTable = $schema->createTable("foo.bar");
         $fooTable->addColumn('id', 'integer');
@@ -58,7 +58,7 @@ class RemoveNamespacedAssetsTest extends \PHPUnit_Framework_TestCase
     {
         $config = new SchemaConfig;
         $config->setName("test");
-        $schema = new Schema(array(), array(), $config);
+        $schema = new Schema(array(), array(), array(), $config);
 
         $testTable = $schema->createTable("test.test");
         $testTable->addColumn('id', 'integer');
