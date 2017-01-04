@@ -1086,9 +1086,15 @@ abstract class AbstractSchemaManager
             $sequences = $this->listSequences();
         }
 
+        $views = [];
+
+        if ($this->_platform->supportsViews()) {
+            $views = $this->listViews();
+        }
+
         $tables = $this->listTables();
 
-        return new Schema($tables, $sequences, $this->createSchemaConfig(), $namespaces);
+        return new Schema($tables, $views, $sequences, $this->createSchemaConfig(), $namespaces);
     }
 
     /**

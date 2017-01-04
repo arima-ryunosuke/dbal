@@ -36,6 +36,9 @@ class SchemaException extends \Doctrine\DBAL\DBALException
     const FOREIGNKEY_DOESNT_EXIST = 100;
     const NAMESPACE_ALREADY_EXISTS = 110;
 
+    const VIEW_DOESNT_EXIST = 1010;
+    const VIEW_ALREADY_EXISTS = 1020;
+
     /**
      * @param string $tableName
      *
@@ -44,6 +47,16 @@ class SchemaException extends \Doctrine\DBAL\DBALException
     public static function tableDoesNotExist($tableName)
     {
         return new self("There is no table with name '".$tableName."' in the schema.", self::TABLE_DOESNT_EXIST);
+    }
+
+    /**
+     * @param string $viewName
+     *
+     * @return \Doctrine\DBAL\Schema\SchemaException
+     */
+    static public function viewDoesNotExist($viewName)
+    {
+        return new self("There is no view with name '".$viewName."' in the schema.", self::VIEW_DOESNT_EXIST);
     }
 
     /**
@@ -110,6 +123,16 @@ class SchemaException extends \Doctrine\DBAL\DBALException
     public static function tableAlreadyExists($tableName)
     {
         return new self("The table with name '".$tableName."' already exists.", self::TABLE_ALREADY_EXISTS);
+    }
+
+    /**
+     * @param string $viewName
+     *
+     * @return \Doctrine\DBAL\Schema\SchemaException
+     */
+    static public function viewAlreadyExists($viewName)
+    {
+        return new self("The view with name '".$viewName."' already exists.", self::VIEW_ALREADY_EXISTS);
     }
 
     /**

@@ -2877,6 +2877,19 @@ abstract class AbstractPlatform
     }
 
     /**
+     * @param string $name
+     * @param string $sql
+     *
+     * @return string
+     *
+     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     */
+    public function getReplaceViewSQL($name, $sql)
+    {
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
      * Returns the list of indexes for the current database.
      *
      * The current database parameter is optional but will always be passed
@@ -3340,6 +3353,16 @@ abstract class AbstractPlatform
     public function supportsViews()
     {
         return true;
+    }
+
+    /**
+     * Whether this platform supports CREATE OR REPLACE VIEW.
+     *
+     * @return boolean
+     */
+    public function supportsReplaceView()
+    {
+        return false;
     }
 
     /**

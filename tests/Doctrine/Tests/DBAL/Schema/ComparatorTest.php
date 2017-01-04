@@ -96,8 +96,8 @@ class ComparatorTest extends \PHPUnit\Framework\TestCase
         $table = new Table('bugdb', array ('integerfield1' => new Column('integerfield1', Type::getType('integer'))));
         $table->setSchemaConfig($schemaConfig);
 
-        $schema1 = new Schema( array($table), array(), $schemaConfig );
-        $schema2 = new Schema( array(),       array(), $schemaConfig );
+        $schema1 = new Schema( array($table), array(), array(), $schemaConfig );
+        $schema2 = new Schema( array(),       array(), array(), $schemaConfig );
 
         $expected = new SchemaDiff( array(), array(), array('bugdb' => $table), $schema1 );
 
@@ -110,8 +110,8 @@ class ComparatorTest extends \PHPUnit\Framework\TestCase
         $table = new Table('bugdb', array ('integerfield1' => new Column('integerfield1', Type::getType('integer'))));
         $table->setSchemaConfig($schemaConfig);
 
-        $schema1 = new Schema( array(),       array(), $schemaConfig );
-        $schema2 = new Schema( array($table), array(), $schemaConfig );
+        $schema1 = new Schema( array(),       array(), array(), $schemaConfig );
+        $schema2 = new Schema( array($table), array(), array(), $schemaConfig );
 
         $expected = new SchemaDiff( array('bugdb' => $table), array(), array(), $schema1 );
 
@@ -543,6 +543,29 @@ class ComparatorTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(1, count($tableDiff->changedOptions));
     }
 
+    public function testView()
+    {
+        $schema1 = new Schema();
+        $removedView = $schema1->createView('removedView', 'select 1');
+        $changedView = $schema1->createView('changedView', 'select 2');
+        $unchangedView = $schema1->createView('unchangedView', 'select 5');
+
+        $schema2 = new Schema();
+        $addedView = $schema2->createView('addedView', 'select 3');
+        $changedView = $schema2->createView('changedView', 'select 9');
+        $unchangedView = $schema2->createView('unchangedView', 'select 5');
+
+        $c = new Comparator();
+        $diffSchema = $c->compare($schema1, $schema2);
+
+        $this->assertEquals(1, count($diffSchema->newViews));
+        $this->assertEquals(1, count($diffSchema->changedViews));
+        $this->assertEquals(1, count($diffSchema->removedViews));
+        $this->assertSame($addedView, $diffSchema->newViews[0]);
+        $this->assertSame($changedView, $diffSchema->changedViews[0]);
+        $this->assertSame($removedView, $diffSchema->removedViews[0]);
+    }
+
     public function testMovedForeignKeyForeignTable()
     {
         $tableForeign = new Table("bar");
@@ -861,10 +884,10 @@ class ComparatorTest extends \PHPUnit\Framework\TestCase
         $config = new SchemaConfig();
         $config->setName("foo");
 
-        $oldSchema = new Schema(array(), array(), $config);
+        $oldSchema = new Schema(array(), array(), array(), $config);
         $oldSchema->createTable('bar');
 
-        $newSchema= new Schema(array(), array(), $config);
+        $newSchema= new Schema(array(), array(), array(), $config);
         $newSchema->createTable('foo.bar');
 
         $expected = new SchemaDiff();
@@ -881,11 +904,11 @@ class ComparatorTest extends \PHPUnit\Framework\TestCase
         $config = new SchemaConfig();
         $config->setName("schemaName");
 
-        $oldSchema = new Schema(array(), array(), $config);
+        $oldSchema = new Schema(array(), array(), array(), $config);
         $oldSchema->createTable('taz');
         $oldSchema->createTable('war.tab');
 
-        $newSchema= new Schema(array(), array(), $config);
+        $newSchema= new Schema(array(), array(), array(), $config);
         $newSchema->createTable('bar.tab');
         $newSchema->createTable('baz.tab');
         $newSchema->createTable('war.tab');
@@ -908,7 +931,7 @@ class ComparatorTest extends \PHPUnit\Framework\TestCase
         $config = new SchemaConfig();
         $config->setName("foo");
 
-        $oldSchema = new Schema(array(), array(), $config);
+        $oldSchema = new Schema(array(), array(), array(), $config);
         $oldSchema->createTable('foo.bar');
 
         $newSchema = new Schema();
@@ -927,7 +950,7 @@ class ComparatorTest extends \PHPUnit\Framework\TestCase
     {
         $config = new SchemaConfig();
         $config->setName("foo");
-        $oldSchema = new Schema(array(), array(), $config);
+        $oldSchema = new Schema(array(), array(), array(), $config);
         $oldSchema->createTable('bar');
 
         $newSchema = new Schema();

@@ -101,7 +101,7 @@ class SchemaTest extends \PHPUnit\Framework\TestCase
     {
         $sequence = new Sequence("a_seq", 1, 1);
 
-        $schema = new Schema(array(), array($sequence));
+        $schema = new Schema(array(), array(), array($sequence));
 
         self::assertTrue($schema->hasSequence("a_seq"));
         self::assertInstanceOf('Doctrine\DBAL\Schema\Sequence', $schema->getSequence("a_seq"));
@@ -114,7 +114,7 @@ class SchemaTest extends \PHPUnit\Framework\TestCase
     {
         $sequence = new Sequence("a_Seq");
 
-        $schema = new Schema(array(), array($sequence));
+        $schema = new Schema(array(), array(), array($sequence));
         self::assertTrue($schema->hasSequence('a_seq'));
         self::assertTrue($schema->hasSequence('a_Seq'));
         self::assertTrue($schema->hasSequence('A_SEQ'));
@@ -152,7 +152,7 @@ class SchemaTest extends \PHPUnit\Framework\TestCase
     {
         $sequence = new Sequence("a_seq", 1, 1);
 
-        $schema = new Schema(array(), array($sequence));
+        $schema = new Schema(array(), array(), array($sequence));
 
         $schema->dropSequence("a_seq");
         self::assertFalse($schema->hasSequence("a_seq"));
@@ -164,7 +164,7 @@ class SchemaTest extends \PHPUnit\Framework\TestCase
 
         $sequence = new Sequence("a_seq", 1, 1);
 
-        $schema = new Schema(array(), array($sequence, $sequence));
+        $schema = new Schema(array(), array(), array($sequence, $sequence));
     }
 
     public function testConfigMaxIdentifierLength()
@@ -172,7 +172,7 @@ class SchemaTest extends \PHPUnit\Framework\TestCase
         $schemaConfig = new \Doctrine\DBAL\Schema\SchemaConfig();
         $schemaConfig->setMaxIdentifierLength(5);
 
-        $schema = new Schema(array(), array(), $schemaConfig);
+        $schema = new Schema(array(), array(), array(), $schemaConfig);
         $table = $schema->createTable("smalltable");
         $table->addColumn('long_id', 'integer');
         $table->addIndex(array('long_id'));

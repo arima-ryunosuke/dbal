@@ -269,6 +269,14 @@ class MySqlPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
+    public function getReplaceViewSQL($name, $sql)
+    {
+        return 'CREATE OR REPLACE VIEW ' . $name . ' AS ' . $sql;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     protected function getVarcharTypeDeclarationSQLSnippet($length, $fixed)
     {
         return $fixed ? ($length ? 'CHAR(' . $length . ')' : 'CHAR(255)')
@@ -408,6 +416,14 @@ class MySqlPlatform extends AbstractPlatform
      * {@inheritDoc}
      */
     public function supportsColumnCollation()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsReplaceView()
     {
         return true;
     }
