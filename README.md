@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Doctrine DBAL
 
 Powerful database abstraction layer with many features for database schema introspection, schema management and PDO abstraction.
@@ -24,6 +23,7 @@ This forked repository has specialized mysql when comparing.
 - support FIRST / AFTER suffix when add column
 - support TABLE OPTION (e.g. ROW_FORMAT, ENGINE etc) when create table, alter table
 - support SPATIAL types (e.g. POINT, GEOMETRY etc)
+- support Compare view
 - fix UPPERCASE index name when rename index
 
 ### example:
