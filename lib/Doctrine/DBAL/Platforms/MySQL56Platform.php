@@ -19,49 +19,40 @@
 
 namespace Doctrine\DBAL\Platforms;
 
-use Doctrine\DBAL\Schema\Index;
-use Doctrine\DBAL\Schema\TableDiff;
-
 /**
- * Provides the behavior, features and SQL dialect of the MySQL 5.7 database platform.
+ * Provides the behavior, features and SQL dialect of the MySQL 5.6 database platform.
  *
  * @author Steve Müller <st.mueller@dzh-online.de>
  * @link   www.doctrine-project.org
  * @since  2.5
  */
-class MySQL57Platform extends MySQL56Platform
+class MySQL56Platform extends MySqlPlatform
 {
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    protected function getPreAlterTableRenameIndexForeignKeySQL(TableDiff $diff)
+    public function getDateTimeTypeDeclarationSQL(array $fieldDeclaration)
     {
-        return array();
+        $declaration = parent::getDateTimeTypeDeclarationSQL($fieldDeclaration);
+
+        if (isset($fieldDeclaration['length']) && $fieldDeclaration['length']) {
+            $declaration .= '(' . $fieldDeclaration['length'] . ')';
+        }
+
+        return $declaration;
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      */
-    protected function getPostAlterTableRenameIndexForeignKeySQL(TableDiff $diff)
+    public function getTimeTypeDeclarationSQL(array $fieldDeclaration)
     {
-        return array();
-    }
+        $declaration = parent::getTimeTypeDeclarationSQL($fieldDeclaration);
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getRenameIndexSQL($oldIndexName, Index $index, $tableName)
-    {
-        return array(
-            'ALTER TABLE ' . $tableName . ' RENAME INDEX ' . $oldIndexName . ' TO ' . $index->getQuotedName($this)
-        );
-    }
+        if (isset($fieldDeclaration['length']) && $fieldDeclaration['length']) {
+            $declaration .= '(' . $fieldDeclaration['length'] . ')';
+        }
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function getReservedKeywordsClass()
-    {
-        return 'Doctrine\DBAL\Platforms\Keywords\MySQL57Keywords';
+        return $declaration;
     }
 }

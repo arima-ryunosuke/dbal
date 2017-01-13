@@ -55,7 +55,7 @@ class AbstractMySQLDriverTest extends AbstractDriverTest
     protected function getDatabasePlatformsForVersions()
     {
         return array(
-            array('5.6.9', 'Doctrine\DBAL\Platforms\MySqlPlatform'),
+            array('5.6.9', 'Doctrine\DBAL\Platforms\MySQL56Platform'),
             array('5.7', 'Doctrine\DBAL\Platforms\MySQL57Platform'),
             array('5.7.0', 'Doctrine\DBAL\Platforms\MySQL57Platform'),
             array('5.7.1', 'Doctrine\DBAL\Platforms\MySQL57Platform'),
