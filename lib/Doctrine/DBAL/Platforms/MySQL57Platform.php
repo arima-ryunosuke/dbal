@@ -31,7 +31,7 @@ use Doctrine\DBAL\Types\Type;
  * @link   www.doctrine-project.org
  * @since  2.5
  */
-class MySQL57Platform extends MySqlPlatform
+class MySQL57Platform extends MySQL56Platform
 {
     /**
      * {@inheritdoc}
