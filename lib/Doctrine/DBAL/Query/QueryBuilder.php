@@ -1144,6 +1144,11 @@ class QueryBuilder
                 $tableReference = $from['alias'];
             }
 
+            // forr hint clause
+            if (isset($from['hint'])) {
+                $tableSql .= ' ' . $from['hint'];
+            }
+
             $knownAliases[$tableReference] = true;
 
             $fromClauses[$tableReference] = $tableSql . $this->getSQLForJoins($tableReference, $knownAliases);
