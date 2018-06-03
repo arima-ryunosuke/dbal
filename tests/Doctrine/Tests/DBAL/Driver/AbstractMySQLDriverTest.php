@@ -4,6 +4,7 @@ namespace Doctrine\Tests\DBAL\Driver;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\MariaDb1027Platform;
+use Doctrine\DBAL\Platforms\MySQL56Platform;
 use Doctrine\DBAL\Platforms\MySQL57Platform;
 use Doctrine\DBAL\Platforms\MySqlPlatform;
 use Doctrine\DBAL\Schema\MySqlSchemaManager;
@@ -57,16 +58,16 @@ class AbstractMySQLDriverTest extends AbstractDriverTest
     protected function getDatabasePlatformsForVersions() : array
     {
         return [
-            ['5.6.9', MySqlPlatform::class],
+            ['5.6.9', MySQL56Platform::class],
             ['5.7', MySQL57Platform::class],
-            ['5.7.0', MySqlPlatform::class],
-            ['5.7.8', MySqlPlatform::class],
+            ['5.7.0', MySQL56Platform::class],
+            ['5.7.8', MySQL56Platform::class],
             ['5.7.9', MySQL57Platform::class],
             ['5.7.10', MySQL57Platform::class],
             ['6', MySQL57Platform::class],
-            ['10.0.15-MariaDB-1~wheezy', MySqlPlatform::class],
+            ['10.0.15-MariaDB-1~wheezy', MySQL56Platform::class],
             ['5.5.5-10.1.25-MariaDB', MySqlPlatform::class],
-            ['10.1.2a-MariaDB-a1~lenny-log', MySqlPlatform::class],
+            ['10.1.2a-MariaDB-a1~lenny-log', MySQL56Platform::class],
             ['5.5.40-MariaDB-1~wheezy', MySqlPlatform::class],
             ['5.5.5-MariaDB-10.2.8+maria~xenial-log', MariaDb1027Platform::class],
             ['10.2.8-MariaDB-10.2.8+maria~xenial-log', MariaDb1027Platform::class],
