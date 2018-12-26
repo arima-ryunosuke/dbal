@@ -20,6 +20,7 @@ use Doctrine\DBAL\Exception\TableExistsException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\DBAL\Platforms\MariaDb1027Platform;
+use Doctrine\DBAL\Platforms\MySQL56Platform;
 use Doctrine\DBAL\Platforms\MySQL57Platform;
 use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\DBAL\Platforms\MySqlPlatform;
@@ -148,6 +149,9 @@ abstract class AbstractMySQLDriver implements Driver, ExceptionConverterDriver, 
 
             if (version_compare($oracleMysqlVersion, '5.7.9', '>=')) {
                 return new MySQL57Platform();
+            }
+            if (version_compare($oracleMysqlVersion, '5.6', '>=')) {
+                return new MySQL56Platform();
             }
         }
 
