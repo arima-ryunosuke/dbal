@@ -224,6 +224,18 @@ class ComparatorTest extends TestCase
         self::assertEquals([], $c->diffColumn($column1, $column2));
     }
 
+    public function testCompareChangedColumns_ChangeTextLength()
+    {
+        $column1 = new Column('textfield1', Type::getType('text'), ['Length' => 128]);
+        $column2 = new Column('textfield1', Type::getType('text'), ['Length' => 65536]);
+        $column3 = new Column('textfield1', Type::getType('text'), ['Length' => 65536]);
+
+        $c = new Comparator();
+        self::assertEquals(['length'], $c->diffColumn($column1, $column2));
+        self::assertEquals([], $c->diffColumn($column1, $column1));
+        self::assertEquals([], $c->diffColumn($column2, $column3));
+    }
+
     public function testCompareChangedColumnsChangeCustomSchemaOption()
     {
         $column1 = new Column('charfield1', Type::getType('string'));
