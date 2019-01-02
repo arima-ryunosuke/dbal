@@ -377,6 +377,26 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         self::assertEquals('LONGBLOB', $this->platform->getBlobTypeDeclarationSQL([]));
     }
 
+    public function testAlterTableOption(): void
+    {
+        $table = new Table('alter_table_option');
+        
+        $diffTable  = clone $table;
+        $diffTable->addOption('engine', 'engine-name');
+        $diffTable->addOption('comment', 'comment-text');
+        $diffTable->addOption('create_options', ['row_format' => 'row-format']);
+
+        $comparator = new Comparator();
+
+        self::assertEquals(
+            ["ALTER TABLE alter_table_option DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = engine-name COMMENT = 'comment-text'  ROW_FORMAT = row-format"],
+            $this->platform->getAlterTableSQL($comparator->diffTable($table, $diffTable))
+        );
+    }
+
+    /**
+     * @group DBAL-400
+     */
     public function testAlterTableAddPrimaryKey(): void
     {
         $table = new Table('alter_table_add_pk');
