@@ -494,16 +494,20 @@ SQL
 
         $tableOptions = [];
 
+        // why get is 'collation' but set is 'collate' ?
+        $options['collate'] = $options['collate'] ?? $options['collation'] ?? null;
+
         // Charset
         if (! isset($options['charset'])) {
-            $options['charset'] = 'utf8';
+            $options['charset'] = explode('_', $options['collate'] ?? 'utf8')[0];
         }
 
         $tableOptions[] = sprintf('DEFAULT CHARACTER SET %s', $options['charset']);
 
         // Collate
         if (! isset($options['collate'])) {
-            $options['collate'] = $options['charset'] . '_unicode_ci';
+            $unicode = !!preg_match('#^((utf)|(usc))#', $options['charset']);
+            $options['collate'] = $options['charset'] . ($unicode ? '_unicode_ci' : '_bin');
         }
 
         $tableOptions[] = $this->getColumnCollationDeclarationSQL($options['collate']);
@@ -635,9 +639,29 @@ SQL
         $tableSql = [];
 
         if (! $this->onSchemaAlterTable($diff, $tableSql)) {
-            if (count($queryParts) > 0) {
-                $sql[] = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this) . ' '
-                    . implode(', ', $queryParts);
+            if (count($queryParts) > 0 || $diff->changedOptions) {
+                $query = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this);
+
+                if (count($queryParts) > 0) {
+                    $query .= ' ' . implode(", ", $queryParts);
+                }
+
+                if ($diff->changedOptions) {
+                    if (count($queryParts) > 0) {
+                        $query .= ',';
+                    }
+                    $changedOptions = [
+                        'table_options' => $diff->changedOptions['table_options'] ?? null,
+                        'engine'        => $diff->changedOptions['engine'] ?? null,
+                        'collation'     => $diff->changedOptions['collation'] ?? null,
+                        'comment'       => $diff->changedOptions['comment'] ?? null,
+                        'row_format'    => $diff->changedOptions['create_options']['row_format'] ?? null,
+                    ];
+                    $changedOptions = array_filter($changedOptions, function ($v) { return $v !== null; });
+                    $query .= ' ' . $this->buildTableOptions($changedOptions);
+                }
+
+                $sql[] = $query;
             }
 
             $sql = array_merge(

@@ -593,6 +593,21 @@ class ComparatorTest extends TestCase
         self::assertCount(1, $tableDiff->changedForeignKeys);
     }
 
+    public function testTableOptions(): void
+    {
+        $table1 = new Table("foo");
+        $table1->addOption('hoge', 'foo');
+
+        $table2 = new Table("foo");
+        $table2->addOption('hoge', 'bar');
+
+        $c = new Comparator();
+        $tableDiff = $c->diffTable($table1, $table2);
+
+        $this->assertInstanceOf('Doctrine\DBAL\Schema\TableDiff', $tableDiff);
+        $this->assertEquals(1, count($tableDiff->changedOptions));
+    }
+
     public function testMovedForeignKeyForeignTable(): void
     {
         $tableForeign = new Table('bar');
