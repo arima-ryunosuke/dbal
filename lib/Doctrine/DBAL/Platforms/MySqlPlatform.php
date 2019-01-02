@@ -501,7 +501,7 @@ SQL
 
         // Collate
         if (! isset($options['collate'])) {
-            $options['collate'] = $options['charset'] . '_unicode_ci';
+            $options['collate'] = $options['collation'] ?? $options['charset'] . '_unicode_ci';
         }
 
         $tableOptions[] = sprintf('COLLATE %s', $options['collate']);
@@ -619,8 +619,29 @@ SQL
         $tableSql = [];
 
         if (! $this->onSchemaAlterTable($diff, $tableSql)) {
-            if (count($queryParts) > 0) {
-                $sql[] = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this) . ' ' . implode(', ', $queryParts);
+            if (count($queryParts) > 0 || $diff->changedOptions) {
+                $query = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this);
+
+                if (count($queryParts) > 0) {
+                    $query .= ' ' . implode(", ", $queryParts);
+                }
+
+                if ($diff->changedOptions) {
+                    if (count($queryParts) > 0) {
+                        $query .= ',';
+                    }
+                    $changedOptions = [
+                        'table_options' => $diff->changedOptions['table_options'] ?? null,
+                        'engine'        => $diff->changedOptions['engine'] ?? null,
+                        'collate'       => $diff->changedOptions['collation'] ?? null,
+                        'comment'       => $diff->changedOptions['comment'] ?? null,
+                        'row_format'    => $diff->changedOptions['create_options']['row_format'] ?? null,
+                    ];
+                    $changedOptions = array_filter($changedOptions, function ($v) { return $v !== null; });
+                    $query .= ' ' . $this->buildTableOptions($changedOptions);
+                }
+
+                $sql[] = $query;
             }
             $sql = array_merge(
                 $this->getPreAlterTableIndexForeignKeySQL($diff),

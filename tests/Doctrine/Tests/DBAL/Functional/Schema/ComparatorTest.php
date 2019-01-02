@@ -34,6 +34,10 @@ class ComparatorTest extends DbalFunctionalTestCase
     {
         $table = new Table('default_value');
         $table->addColumn('test', $type, ['default' => $value]);
+        $table->addOption('engine', 'InnoDB');
+        $table->addOption('collation', 'utf8_unicode_ci');
+        $table->addOption('comment', '');
+        $table->addOption('create_options', []);
 
         $this->schemaManager->dropAndCreateTable($table);
 
