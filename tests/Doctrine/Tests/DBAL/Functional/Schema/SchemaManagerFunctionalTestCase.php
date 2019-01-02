@@ -415,6 +415,10 @@ class SchemaManagerFunctionalTestCase extends DbalFunctionalTestCase
 
         $offlineTable = $this->createListTableColumns();
         $this->schemaManager->dropAndCreateTable($offlineTable);
+        $offlineTable->addOption('engine', 'InnoDB');
+        $offlineTable->addOption('collation', 'utf8_unicode_ci');
+        $offlineTable->addOption('comment', '');
+        $offlineTable->addOption('create_options', []);
         $onlineTable = $this->schemaManager->listTableDetails('list_table_columns');
 
         $comparator = new Comparator();
