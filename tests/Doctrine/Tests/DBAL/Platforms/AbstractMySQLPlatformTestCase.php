@@ -537,6 +537,29 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         self::assertEquals(['ALTER TABLE foo ADD id INT AUTO_INCREMENT NOT NULL, ADD PRIMARY KEY (id)'], $sql);
     }
 
+    public function testColumnPosition(): void
+    {
+        $oldTable = new Table("foo");
+        $oldTable->addColumn('c2', 'integer')->setPlatformOption('beforeColumn', null);
+        $oldTable->addColumn('c9', 'integer')->setPlatformOption('beforeColumn', null);
+
+        $newtable = new Table("foo");
+        $newtable->addColumn('c1', 'integer')->setPlatformOption('beforeColumn', null);
+        $newtable->addColumn('c2', 'integer')->setPlatformOption('beforeColumn', 'c1');
+        $newtable->addColumn('c3', 'integer')->setPlatformOption('beforeColumn', 'c2');
+        $newtable->addColumn('c4', 'integer')->setPlatformOption('beforeColumn', 'c3');
+        $newtable->addColumn('c9', 'string')->setPlatformOption('beforeColumn', 'c4');
+
+        $c    = new Comparator();
+        $diff = $c->diffTable($oldTable, $newtable);
+
+        $sql = $this->platform->getAlterTableSQL($diff);
+
+        self::assertEquals([
+            "ALTER TABLE foo ADD c1 INT NOT NULL FIRST, ADD c3 INT NOT NULL AFTER c2, ADD c4 INT NOT NULL AFTER c3, CHANGE c9 c9 VARCHAR(255) NOT NULL AFTER c4",
+        ], $sql);
+    }
+
     public function testNamedPrimaryKey(): void
     {
         $diff                              = new TableDiff('mytable');

@@ -376,10 +376,13 @@ class MySqlPlatform extends AbstractPlatform
             $database = 'DATABASE()';
         }
 
+        $where = "TABLE_SCHEMA = $database AND TABLE_NAME = $table";
+        $beforeColumn = ", (SELECT COLUMN_NAME FROM information_schema.COLUMNS AS C2 WHERE $where AND C1.ORDINAL_POSITION = C2.ORDINAL_POSITION + 1) AS BeforeColumn";
+
         return 'SELECT COLUMN_NAME AS Field, COLUMN_TYPE AS Type, IS_NULLABLE AS `Null`, ' .
                'COLUMN_KEY AS `Key`, COLUMN_DEFAULT AS `Default`, EXTRA AS Extra, COLUMN_COMMENT AS Comment, ' .
                'CHARACTER_SET_NAME AS CharacterSet, COLLATION_NAME AS Collation ' .
-               'FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ' . $database . ' AND TABLE_NAME = ' . $table .
+               "$beforeColumn FROM information_schema.COLUMNS C1 WHERE $where" .
                ' ORDER BY ORDINAL_POSITION ASC';
     }
 
@@ -564,6 +567,22 @@ SQL
             $queryParts[] = 'RENAME TO ' . $newName->getQuotedName($this);
         }
 
+        // unset changedColumn that POSITIONAL diff only
+        foreach ($diff->changedColumns as $name => $columnDiff) {
+            if ($columnDiff->changedProperties === ['beforeColumn']) {
+                foreach ($diff->addedColumns as $addedColumns) {
+                    if ($addedColumns->getName() === $columnDiff->column->getPlatformOption('beforeColumn')) {
+                        unset($diff->changedColumns[$name]);
+                    }
+                }
+                foreach ($diff->removedColumns as $removedColumns) {
+                    if ($removedColumns->getName() === $columnDiff->fromColumn->getPlatformOption('beforeColumn')) {
+                        unset($diff->changedColumns[$name]);
+                    }
+                }
+            }
+        }
+
         foreach ($diff->addedColumns as $column) {
             if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
                 continue;
@@ -573,7 +592,15 @@ SQL
                 'comment' => $this->getColumnComment($column),
             ]);
 
-            $queryParts[] = 'ADD ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
+            $query = 'ADD ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
+            if (array_key_exists('beforeColumn', $columnArray)) {
+                if ($columnArray['beforeColumn']) {
+                    $query .= " AFTER " . $columnArray['beforeColumn'];
+                } else {
+                    $query .= " FIRST";
+                }
+            }
+            $queryParts[] = $query;
         }
 
         foreach ($diff->removedColumns as $column) {
@@ -602,8 +629,17 @@ SQL
             }
 
             $columnArray['comment'] = $this->getColumnComment($column);
-            $queryParts[]           =  'CHANGE ' . ($columnDiff->getOldColumnName()->getQuotedName($this)) . ' '
+
+            $query =  'CHANGE ' . ($columnDiff->getOldColumnName()->getQuotedName($this)) . ' '
                     . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
+            if (array_key_exists('beforeColumn', $columnArray)) {
+                if ($columnArray['beforeColumn']) {
+                    $query .= " AFTER " . $columnArray['beforeColumn'];
+                } else {
+                    $query .= " FIRST";
+                }
+            }
+            $queryParts[] = $query;
         }
 
         foreach ($diff->renamedColumns as $oldColumnName => $column) {
