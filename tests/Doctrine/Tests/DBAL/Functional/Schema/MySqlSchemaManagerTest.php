@@ -233,6 +233,23 @@ class MySqlSchemaManagerTest extends SchemaManagerFunctionalTestCase
         self::assertEquals('utf8_general_ci', $columns['bar']->getPlatformOption('collation'));
     }
 
+    public function testColumnPosition()
+    {
+        $table = new Table('test_position');
+        $table->addColumn('id', 'integer');
+        $table->addColumn('text', 'text');
+        $table->addColumn('foo', 'text');
+        $table->addColumn('bar', 'text');
+        $this->schemaManager->dropAndCreateTable($table);
+
+        $columns = $this->schemaManager->listTableColumns('test_position');
+
+        self::assertArrayNotHasKey('beforeColumn', $columns['id']->getPlatformOptions());
+        self::assertEquals('id', $columns['text']->getPlatformOption('beforeColumn'));
+        self::assertEquals('text', $columns['foo']->getPlatformOption('beforeColumn'));
+        self::assertEquals('foo', $columns['bar']->getPlatformOption('beforeColumn'));
+    }
+
     /**
      * @group DBAL-843
      */
