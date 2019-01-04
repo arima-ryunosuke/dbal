@@ -75,8 +75,8 @@ class ComparatorTest extends TestCase
         $table        = new Table('bugdb', ['integerfield1' => new Column('integerfield1', Type::getType('integer'))]);
         $table->setSchemaConfig($schemaConfig);
 
-        $schema1 = new Schema([$table], [], $schemaConfig);
-        $schema2 = new Schema([], [], $schemaConfig);
+        $schema1 = new Schema([$table], [], [], $schemaConfig);
+        $schema2 = new Schema([], [], [], $schemaConfig);
 
         $expected = new SchemaDiff([], [], ['bugdb' => $table], $schema1);
 
@@ -89,8 +89,8 @@ class ComparatorTest extends TestCase
         $table        = new Table('bugdb', ['integerfield1' => new Column('integerfield1', Type::getType('integer'))]);
         $table->setSchemaConfig($schemaConfig);
 
-        $schema1 = new Schema([], [], $schemaConfig);
-        $schema2 = new Schema([$table], [], $schemaConfig);
+        $schema1 = new Schema([], [], [], $schemaConfig);
+        $schema2 = new Schema([$table], [], [], $schemaConfig);
 
         $expected = new SchemaDiff(['bugdb' => $table], [], [], $schema1);
 
@@ -573,6 +573,29 @@ class ComparatorTest extends TestCase
         $this->assertEquals(1, count($tableDiff->changedOptions));
     }
 
+    public function testView()
+    {
+        $schema1 = new Schema();
+        $removedView = $schema1->createView('removedView', 'select 1');
+        $schema1->createView('changedView', 'select 2');
+        $schema1->createView('unchangedView', 'select 5');
+
+        $schema2 = new Schema();
+        $addedView = $schema2->createView('addedView', 'select 3');
+        $changedView = $schema2->createView('changedView', 'select 9');
+        $schema2->createView('unchangedView', 'select 5');
+
+        $c = new Comparator();
+        $diffSchema = $c->compare($schema1, $schema2);
+
+        $this->assertEquals(1, count($diffSchema->newViews));
+        $this->assertEquals(1, count($diffSchema->changedViews));
+        $this->assertEquals(1, count($diffSchema->removedViews));
+        $this->assertSame($addedView, $diffSchema->newViews[0]);
+        $this->assertSame($changedView, $diffSchema->changedViews[0]);
+        $this->assertSame($removedView, $diffSchema->removedViews[0]);
+    }
+
     public function testMovedForeignKeyForeignTable()
     {
         $tableForeign = new Table('bar');
@@ -890,10 +913,10 @@ class ComparatorTest extends TestCase
         $config = new SchemaConfig();
         $config->setName('foo');
 
-        $oldSchema = new Schema([], [], $config);
+        $oldSchema = new Schema([], [], [], $config);
         $oldSchema->createTable('bar');
 
-        $newSchema = new Schema([], [], $config);
+        $newSchema = new Schema([], [], [], $config);
         $newSchema->createTable('foo.bar');
 
         $expected             = new SchemaDiff();
@@ -910,11 +933,11 @@ class ComparatorTest extends TestCase
         $config = new SchemaConfig();
         $config->setName('schemaName');
 
-        $oldSchema = new Schema([], [], $config);
+        $oldSchema = new Schema([], [], [], $config);
         $oldSchema->createTable('taz');
         $oldSchema->createTable('war.tab');
 
-        $newSchema = new Schema([], [], $config);
+        $newSchema = new Schema([], [], [], $config);
         $newSchema->createTable('bar.tab');
         $newSchema->createTable('baz.tab');
         $newSchema->createTable('war.tab');
@@ -937,7 +960,7 @@ class ComparatorTest extends TestCase
         $config = new SchemaConfig();
         $config->setName('foo');
 
-        $oldSchema = new Schema([], [], $config);
+        $oldSchema = new Schema([], [], [], $config);
         $oldSchema->createTable('foo.bar');
 
         $newSchema = new Schema();
@@ -956,7 +979,7 @@ class ComparatorTest extends TestCase
     {
         $config = new SchemaConfig();
         $config->setName('foo');
-        $oldSchema = new Schema([], [], $config);
+        $oldSchema = new Schema([], [], [], $config);
         $oldSchema->createTable('bar');
 
         $newSchema = new Schema();

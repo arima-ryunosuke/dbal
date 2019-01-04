@@ -106,7 +106,7 @@ class SchemaTest extends TestCase
     {
         $sequence = new Sequence('a_seq', 1, 1);
 
-        $schema = new Schema([], [$sequence]);
+        $schema = new Schema([], [], [$sequence]);
 
         self::assertTrue($schema->hasSequence('a_seq'));
         self::assertInstanceOf(Sequence::class, $schema->getSequence('a_seq'));
@@ -119,7 +119,7 @@ class SchemaTest extends TestCase
     {
         $sequence = new Sequence('a_Seq');
 
-        $schema = new Schema([], [$sequence]);
+        $schema = new Schema([], [], [$sequence]);
         self::assertTrue($schema->hasSequence('a_seq'));
         self::assertTrue($schema->hasSequence('a_Seq'));
         self::assertTrue($schema->hasSequence('A_SEQ'));
@@ -157,7 +157,7 @@ class SchemaTest extends TestCase
     {
         $sequence = new Sequence('a_seq', 1, 1);
 
-        $schema = new Schema([], [$sequence]);
+        $schema = new Schema([], [], [$sequence]);
 
         $schema->dropSequence('a_seq');
         self::assertFalse($schema->hasSequence('a_seq'));
@@ -169,7 +169,7 @@ class SchemaTest extends TestCase
 
         $sequence = new Sequence('a_seq', 1, 1);
 
-        $schema = new Schema([], [$sequence, $sequence]);
+        $schema = new Schema([], [], [$sequence, $sequence]);
     }
 
     public function testConfigMaxIdentifierLength()
@@ -177,7 +177,7 @@ class SchemaTest extends TestCase
         $schemaConfig = new SchemaConfig();
         $schemaConfig->setMaxIdentifierLength(5);
 
-        $schema = new Schema([], [], $schemaConfig);
+        $schema = new Schema([], [], [], $schemaConfig);
         $table  = $schema->createTable('smalltable');
         $table->addColumn('long_id', 'integer');
         $table->addIndex(['long_id']);
