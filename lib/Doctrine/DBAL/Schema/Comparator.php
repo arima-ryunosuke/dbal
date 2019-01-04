@@ -155,6 +155,21 @@ class Comparator
             $diff->removedSequences[] = $sequence;
         }
 
+        foreach ($fromSchema->getViews() as $view) {
+            if (! $toSchema->hasView($view->getName())) {
+                $diff->removedViews[] = $view;
+            }
+        }
+
+        foreach ($toSchema->getViews() as $view) {
+            if (! $fromSchema->hasView($view->getName())) {
+                $diff->newViews[] = $view;
+            }
+            else if ($view->getSql() !== $fromSchema->getView($view->getName())->getSql()) {
+                $diff->changedViews[] = $view;
+            }
+        }
+
         return $diff;
     }
 

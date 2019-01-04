@@ -49,6 +49,27 @@ class SchemaDiff
      */
     public $removedTables = [];
 
+    /**
+     * All added views.
+     *
+     * @var View[]
+     */
+    public $newViews = [];
+
+    /**
+     * All changed views.
+     *
+     * @var View[]
+     */
+    public $changedViews = [];
+
+    /**
+     * All removed views.
+     *
+     * @var View[]
+     */
+    public $removedViews = [];
+
     /** @var Sequence[] */
     public $newSequences = [];
 
@@ -163,6 +184,24 @@ class SchemaDiff
 
         foreach ($this->changedTables as $tableDiff) {
             $sql = array_merge($sql, $platform->getAlterTableSQL($tableDiff));
+        }
+
+        if ($platform->supportsViews()) {
+            foreach ($this->newViews as $view) {
+                $sql[] = $platform->getCreateViewSQL($view->getName(), $view->getSql());
+            }
+            foreach ($this->removedViews as $view) {
+                $sql[] = $platform->getDropViewSQL($view->getName());
+            }
+            foreach ($this->changedViews as $view) {
+                if ($platform->supportsReplaceView()) {
+                    $sql[] = $platform->getReplaceViewSQL($view->getName(), $view->getSql());
+                }
+                else {
+                    $sql[] = $platform->getDropViewSQL($view->getName());
+                    $sql[] = $platform->getCreateViewSQL($view->getName(), $view->getSql());
+                }
+            }
         }
 
         return $sql;

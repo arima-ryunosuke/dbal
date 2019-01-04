@@ -2930,6 +2930,19 @@ abstract class AbstractPlatform
 
     /**
      * @param string $name
+     * @param string $sql
+     *
+     * @return string
+     *
+     * @throws DBALException If not supported on this platform.
+     */
+    public function getReplaceViewSQL($name, $sql)
+    {
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
+     * @param string $name
      *
      * @return string
      *
@@ -3344,6 +3357,16 @@ abstract class AbstractPlatform
     public function supportsViews()
     {
         return true;
+    }
+
+    /**
+     * Whether this platform supports CREATE OR REPLACE VIEW.
+     *
+     * @return bool
+     */
+    public function supportsReplaceView()
+    {
+        return false;
     }
 
     /**

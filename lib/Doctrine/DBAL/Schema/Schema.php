@@ -48,6 +48,9 @@ class Schema extends AbstractAsset
     /** @var Table[] */
     protected $_tables = [];
 
+    /** @var View[] */
+    protected $_views = [];
+
     /** @var Sequence[] */
     protected $_sequences = [];
 
@@ -56,11 +59,13 @@ class Schema extends AbstractAsset
 
     /**
      * @param Table[]    $tables
+     * @param View[]     $views
      * @param Sequence[] $sequences
      * @param string[]   $namespaces
      */
     public function __construct(
         array $tables = [],
+        array $views = [],
         array $sequences = [],
         ?SchemaConfig $schemaConfig = null,
         array $namespaces = []
@@ -78,6 +83,10 @@ class Schema extends AbstractAsset
 
         foreach ($tables as $table) {
             $this->_addTable($table);
+        }
+
+        foreach ($views as $view) {
+            $this->_addView($view);
         }
 
         foreach ($sequences as $sequence) {
@@ -117,6 +126,29 @@ class Schema extends AbstractAsset
 
         $this->_tables[$tableName] = $table;
         $table->setSchemaConfig($this->_schemaConfig);
+    }
+
+    /**
+     * @param View $view
+     *
+     * @return void
+     *
+     * @throws \Doctrine\DBAL\Schema\SchemaException
+     */
+    protected function _addView(View $view)
+    {
+        $namespaceName = $view->getNamespaceName();
+        $viewName      = $view->getFullQualifiedName($this->getName());
+
+        if (isset($this->_views[$viewName])) {
+            throw SchemaException::viewAlreadyExists($viewName);
+        }
+
+        if (! $view->isInDefaultNamespace($this->getName()) && ! $this->hasNamespace($namespaceName)) {
+            $this->createNamespace($namespaceName);
+        }
+
+        $this->_views[$viewName] = $view;
     }
 
     /**
@@ -182,6 +214,33 @@ class Schema extends AbstractAsset
     }
 
     /**
+     * Gets all views of this schema.
+     *
+     * @return View[]
+     */
+    public function getViews()
+    {
+        return $this->_views;
+    }
+
+    /**
+     * @param string $viewName
+     *
+     * @return View
+     *
+     * @throws SchemaException
+     */
+    public function getView($viewName)
+    {
+        $viewName = $this->getFullQualifiedAssetName($viewName);
+        if (! isset($this->_views[$viewName])) {
+            throw SchemaException::viewDoesNotExist($viewName);
+        }
+
+        return $this->_views[$viewName];
+    }
+
+    /**
      * @param string $name
      *
      * @return string
@@ -242,6 +301,20 @@ class Schema extends AbstractAsset
     }
 
     /**
+     * Does this schema have a view with the given name?
+     *
+     * @param string $viewName
+     *
+     * @return bool
+     */
+    public function hasView($viewName)
+    {
+        $viewName = $this->getFullQualifiedAssetName($viewName);
+
+        return isset($this->_views[$viewName]);
+    }
+
+    /**
      * Gets all table names, prefixed with a schema name, even the default one if present.
      *
      * @return string[]
@@ -249,6 +322,16 @@ class Schema extends AbstractAsset
     public function getTableNames()
     {
         return array_keys($this->_tables);
+    }
+
+    /**
+     * Gets all view names, prefixed with a schema name, even the default one if present.
+     *
+     * @return string[]
+     */
+    public function getViewNames()
+    {
+        return array_keys($this->_views);
     }
 
     /**
@@ -360,6 +443,57 @@ class Schema extends AbstractAsset
         $name = $this->getFullQualifiedAssetName($name);
         $this->getTable($name);
         unset($this->_tables[$name]);
+
+        return $this;
+    }
+
+    /**
+     * Creates a new view.
+     *
+     * @param string $viewName
+     * @param string $sql
+     *
+     * @return View
+     */
+    public function createView($viewName, $sql)
+    {
+        $view = new View($viewName, $sql);
+        $this->_addView($view);
+
+        return $view;
+    }
+
+    /**
+     * Renames a view.
+     *
+     * @param string $oldViewName
+     * @param string $newViewName
+     *
+     * @return \Doctrine\DBAL\Schema\Schema
+     */
+    public function renameView($oldViewName, $newViewName)
+    {
+        $view = $this->getView($oldViewName);
+        $view->_setName($newViewName);
+
+        $this->dropView($oldViewName);
+        $this->_addView($view);
+
+        return $this;
+    }
+
+    /**
+     * Drops a view from the schema.
+     *
+     * @param string $viewName
+     *
+     * @return \Doctrine\DBAL\Schema\Schema
+     */
+    public function dropView($viewName)
+    {
+        $viewName = $this->getFullQualifiedAssetName($viewName);
+        $this->getView($viewName);
+        unset($this->_views[$viewName]);
 
         return $this;
     }
@@ -477,6 +611,9 @@ class Schema extends AbstractAsset
 
         foreach ($this->_sequences as $k => $sequence) {
             $this->_sequences[$k] = clone $sequence;
+        }
+        foreach ($this->_views as $k => $view) {
+            $this->_views[$k] = clone $view;
         }
     }
 }
