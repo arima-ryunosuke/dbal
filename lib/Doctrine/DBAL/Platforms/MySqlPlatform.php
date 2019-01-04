@@ -212,6 +212,14 @@ class MySqlPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
+    public function getReplaceViewSQL($name, $sql)
+    {
+        return 'CREATE OR REPLACE VIEW ' . $name . ' AS ' . $sql;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getDropViewSQL($name)
     {
         return 'DROP VIEW ' . $name;
@@ -341,6 +349,14 @@ class MySqlPlatform extends AbstractPlatform
      * {@inheritDoc}
      */
     public function supportsInlineColumnComments()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsReplaceView()
     {
         return true;
     }

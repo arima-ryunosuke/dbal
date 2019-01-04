@@ -18,7 +18,7 @@ class RemoveNamespacedAssetsTest extends TestCase
     {
         $config = new SchemaConfig();
         $config->setName('test');
-        $schema = new Schema([], [], $config);
+        $schema = new Schema([], [], [], $config);
 
         $schema->createTable('test.test');
         $schema->createTable('foo.bar');
@@ -37,7 +37,7 @@ class RemoveNamespacedAssetsTest extends TestCase
     {
         $config = new SchemaConfig();
         $config->setName('test');
-        $schema = new Schema([], [], $config);
+        $schema = new Schema([], [], [], $config);
 
         $fooTable = $schema->createTable('foo.bar');
         $fooTable->addColumn('id', 'integer');
@@ -60,7 +60,7 @@ class RemoveNamespacedAssetsTest extends TestCase
     {
         $config = new SchemaConfig();
         $config->setName('test');
-        $schema = new Schema([], [], $config);
+        $schema = new Schema([], [], [], $config);
 
         $testTable = $schema->createTable('test.test');
         $testTable->addColumn('id', 'integer');
