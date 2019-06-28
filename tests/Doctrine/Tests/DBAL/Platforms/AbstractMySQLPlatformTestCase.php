@@ -148,6 +148,14 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         return 'ALTER TABLE test ADD FOREIGN KEY (fk_name_id) REFERENCES other_table (id)';
     }
 
+    public function getGenerateTriggerSql()
+    {
+        return [
+            'create' => 'CREATE TRIGGER trg_dummy AFTER INSERT ON test FOR EACH ROW statement',
+            'drop'   => 'DROP TRIGGER trg_dummy',
+        ];
+    }
+
     /**
      * @group DBAL-126
      */

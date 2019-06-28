@@ -36,6 +36,9 @@ class Table extends AbstractAsset
     /** @var ForeignKeyConstraint[] */
     protected $_fkConstraints = [];
 
+    /** @var Trigger[] */
+    protected $_triggers = [];
+
     /** @var mixed[] */
     protected $_options = [];
 
@@ -47,12 +50,13 @@ class Table extends AbstractAsset
      * @param Column[]               $columns
      * @param Index[]                $indexes
      * @param ForeignKeyConstraint[] $fkConstraints
+     * @param Trigger[]              $triggers
      * @param int                    $idGeneratorType
      * @param mixed[]                $options
      *
      * @throws DBALException
      */
-    public function __construct($tableName, array $columns = [], array $indexes = [], array $fkConstraints = [], $idGeneratorType = 0, array $options = [])
+    public function __construct($tableName, array $columns = [], array $indexes = [], array $fkConstraints = [], array $triggers = [], $idGeneratorType = 0, array $options = [])
     {
         if (strlen($tableName) === 0) {
             throw DBALException::invalidTableName($tableName);
@@ -70,6 +74,10 @@ class Table extends AbstractAsset
 
         foreach ($fkConstraints as $constraint) {
             $this->_addForeignKeyConstraint($constraint);
+        }
+
+        foreach ($triggers as $trigger) {
+            $this->_addTrigger($trigger);
         }
 
         $this->_options = $options;
@@ -424,6 +432,54 @@ class Table extends AbstractAsset
     }
 
     /**
+     * @param string  $triggerName
+     * @param string  $statement
+     * @param mixed[] $options
+     *
+     * @return Trigger
+     */
+    public function addTrigger($triggerName, $statement, array $options = [])
+    {
+        $trigger = new Trigger($triggerName, $statement, $options);
+
+        $this->_addTrigger($trigger);
+
+        return $trigger;
+    }
+
+    /**
+     * Returns whether this table has a Trigger with the given name.
+     *
+     * @param string $triggerName The Trigger name.
+     *
+     * @return bool
+     */
+    public function hasTrigger($triggerName)
+    {
+        $triggerName = $this->normalizeIdentifier($triggerName);
+
+        return isset($this->_triggers[$triggerName]);
+    }
+
+    /**
+     * Drops an trigger from this table.
+     *
+     * @param string $triggerName The trigger name.
+     *
+     * @return void
+     *
+     * @throws SchemaException If the trigger does not exist.
+     */
+    public function dropTrigger($triggerName)
+    {
+        $triggerName = $this->normalizeIdentifier($triggerName);
+        if (! $this->hasTrigger($triggerName)) {
+            throw SchemaException::triggerDoesNotExist($triggerName, $this->_name);
+        }
+        unset($this->_triggers[$triggerName]);
+    }
+
+    /**
      * @param string $name
      * @param string $value
      *
@@ -531,6 +587,22 @@ class Table extends AbstractAsset
 
         $this->_addIndex($indexCandidate);
         $this->implicitIndexes[$this->normalizeIdentifier($indexName)] = $indexCandidate;
+    }
+
+    /**
+     * @return void
+     */
+    protected function _addTrigger(Trigger $trigger)
+    {
+        $trigger->setTable($this);
+
+        $triggerName = $this->normalizeIdentifier($trigger->getName());
+
+        if (isset($this->_triggers[$triggerName])) {
+            throw SchemaException::triggerAlreadyExists($triggerName, $this->_name);
+        }
+
+        $this->_triggers[$triggerName] = $trigger;
     }
 
     /**
@@ -749,6 +821,14 @@ class Table extends AbstractAsset
     public function getForeignKeys()
     {
         return $this->_fkConstraints;
+    }
+
+    /**
+     * @return Trigger[]
+     */
+    public function getTriggers()
+    {
+        return $this->_triggers;
     }
 
     /**

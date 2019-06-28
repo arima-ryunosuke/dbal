@@ -980,7 +980,7 @@ class SchemaManagerFunctionalTestCase extends DbalFunctionalTestCase
 
     protected function getTestTable($name, $options = [])
     {
-        $table = new Table($name, [], [], [], false, $options);
+        $table = new Table($name, [], [], [], [], false, $options);
         $table->setSchemaConfig($this->schemaManager->createSchemaConfig());
         $table->addColumn('id', 'integer', ['notnull' => true]);
         $table->setPrimaryKey(['id']);
@@ -991,7 +991,7 @@ class SchemaManagerFunctionalTestCase extends DbalFunctionalTestCase
 
     protected function getTestCompositeTable($name)
     {
-        $table = new Table($name, [], [], [], false, []);
+        $table = new Table($name, [], [], [], [], false, []);
         $table->setSchemaConfig($this->schemaManager->createSchemaConfig());
         $table->addColumn('id', 'integer', ['notnull' => true]);
         $table->addColumn('other_id', 'integer', ['notnull' => true]);

@@ -290,6 +290,23 @@ class MySqlSchemaManager extends AbstractSchemaManager
         return $result;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function _getPortableTableTriggersList($tableTriggers)
+    {
+        $list = [];
+        foreach ($tableTriggers as $value) {
+            $trigger = new Trigger($value['Trigger'], $value['Statement'], [
+                'Timing' => $value['Timing'],
+                'Event'  => $value['Event'],
+            ]);
+            $list[] = $trigger;
+        }
+
+        return $list;
+    }
+
     public function listTableDetails($tableName)
     {
         $table = parent::listTableDetails($tableName);
