@@ -7,6 +7,7 @@ use Doctrine\DBAL\Schema\Identifier;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Trigger;
 use Doctrine\DBAL\TransactionIsolationLevel;
 use Doctrine\DBAL\Types\BlobType;
 use Doctrine\DBAL\Types\TextType;
@@ -206,6 +207,28 @@ class MySqlPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
+    public function getListTableTriggersSQL($table, $database = null)
+    {
+        $table = $this->quoteStringLiteral($table);
+
+        if ($database !== null) {
+            $database = $this->quoteSingleIdentifier($database);
+        }
+
+        return "SHOW TRIGGERS FROM $database LIKE $table";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsTriggers()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getCreateViewSQL($name, $sql)
     {
         return 'CREATE VIEW ' . $name . ' AS ' . $sql;
@@ -225,6 +248,37 @@ class MySqlPlatform extends AbstractPlatform
     public function getDropViewSQL($name)
     {
         return 'DROP VIEW ' . $name;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getCreateTriggerSQL(Trigger $trigger, $table)
+    {
+        if ($table instanceof Table) {
+            $table = $table->getQuotedName($this);
+        }
+
+        $triggerName = $trigger->getQuotedName($this);
+        $statement = $trigger->getStatement();
+        $options = $trigger->getOptions();
+        $timing = $options['Timing'] ?? null;
+        $event = $options['Event'] ?? null;
+        $foreach = 'ROW'; // mysql is not supported "FOR EACH STATEMENT"
+
+        return "CREATE TRIGGER $triggerName $timing $event ON $table FOR EACH $foreach $statement";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getDropTriggerSQL($trigger)
+    {
+        if ($trigger instanceof Trigger) {
+            $trigger = $trigger->getQuotedName($this);
+        }
+
+        return "DROP TRIGGER $trigger";
     }
 
     /**
@@ -479,6 +533,12 @@ SQL
         if (isset($options['foreignKeys']) && $engine === 'INNODB') {
             foreach ((array) $options['foreignKeys'] as $definition) {
                 $sql[] = $this->getCreateForeignKeySQL($definition, $name);
+            }
+        }
+
+        if (isset($options['triggers'])) {
+            foreach ((array) $options['triggers'] as $definition) {
+                $sql[] = $this->getCreateTriggerSQL($definition, $tableName);
             }
         }
 

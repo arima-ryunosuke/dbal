@@ -25,6 +25,8 @@ class SchemaException extends DBALException
     public const NAMESPACE_ALREADY_EXISTS = 110;
     public const VIEW_DOESNT_EXIST        = 1010;
     public const VIEW_ALREADY_EXISTS      = 1020;
+    public const TRIGGER_DOESNT_EXIST     = 2010;
+    public const TRIGGER_ALREADY_EXISTS   = 2020;
 
     /**
      * @param string $tableName
@@ -192,6 +194,34 @@ class SchemaException extends DBALException
             'but the given foreign key from (' . implode(', ', $foreignKey->getColumns()) . ') onto foreign table ' .
             "'" . $foreignKey->getForeignTableName() . "' (" . implode(', ', $foreignKey->getForeignColumns()) . ')' .
             ' is currently unnamed.'
+        );
+    }
+
+    /**
+     * @param string $triggerName
+     * @param string $table
+     *
+     * @return \Doctrine\DBAL\Schema\SchemaException
+     */
+    public static function triggerAlreadyExists($triggerName, $table)
+    {
+        return new self(
+            sprintf("The trigger with name '%s' was already defined on table '%s'.", $triggerName, $table),
+            self::TRIGGER_ALREADY_EXISTS
+        );
+    }
+
+    /**
+     * @param string $triggerName
+     * @param string $table
+     *
+     * @return \Doctrine\DBAL\Schema\SchemaException
+     */
+    public static function triggerDoesNotExist($triggerName, $table)
+    {
+        return new self(
+            sprintf("Index '%s' does not exist on table '%s'.", $triggerName, $table),
+            self::TRIGGER_DOESNT_EXIST
         );
     }
 

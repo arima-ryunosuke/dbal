@@ -14,6 +14,7 @@ use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Trigger;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\Tests\DbalTestCase;
 use Doctrine\Tests\Types\CommentedType;
@@ -268,6 +269,31 @@ abstract class AbstractPlatformTestCase extends DbalTestCase
             $this->platform->getCreateForeignKeySQL($fk, 'test');
         }
     }
+
+    public function testGeneratesTriggerSql(): void
+    {
+        $trigger = new Trigger('trg_dummy', 'statement', [
+            'Event'  => 'INSERT',
+            'Timing' => 'AFTER',
+        ]);
+
+        if ($this->platform->supportsTriggers()) {
+            $expected = $this->getGenerateTriggerSql();
+            self::assertEquals(
+                $expected['create'],
+                $this->platform->getCreateTriggerSQL($trigger, 'test')
+            );
+            self::assertEquals(
+                $expected['drop'],
+                $this->platform->getDropTriggerSQL($trigger)
+            );
+        } else {
+            $this->expectException(DBALException::class);
+            $this->platform->getCreateTriggerSQL($trigger, 'test');
+        }
+    }
+
+    public function getGenerateTriggerSql() : array { }
 
     protected function getBitAndComparisonExpressionSql(string $value1, string $value2): string
     {

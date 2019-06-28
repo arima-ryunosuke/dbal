@@ -23,6 +23,7 @@ use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Trigger;
 use Doctrine\DBAL\TransactionIsolationLevel;
 use Doctrine\DBAL\Types;
 use Doctrine\DBAL\Types\Type;
@@ -70,6 +71,8 @@ abstract class AbstractPlatform
     public const CREATE_INDEXES = 1;
 
     public const CREATE_FOREIGNKEYS = 2;
+
+    public const CREATE_TRIGGERS = 3;
 
     /**
      * @deprecated Use DateIntervalUnit::INTERVAL_UNIT_SECOND.
@@ -1615,6 +1618,12 @@ abstract class AbstractPlatform
             }
         }
 
+        if (($createFlags&self::CREATE_TRIGGERS) > 0) {
+            foreach ($table->getTriggers() as $trigger) {
+                $options['triggers'][] = $trigger;
+            }
+        }
+
         if ($this->_eventManager !== null && $this->_eventManager->hasListeners(Events::onSchemaCreateTable)) {
             $eventArgs = new SchemaCreateTableEventArgs($table, $columns, $options, $this);
             $this->_eventManager->dispatchEvent(Events::onSchemaCreateTable, $eventArgs);
@@ -1955,6 +1964,18 @@ abstract class AbstractPlatform
         }
 
         return 'ALTER TABLE ' . $table . ' ADD ' . $this->getForeignKeyDeclarationSQL($foreignKey);
+    }
+
+    /**
+     * Returns the SQL to create a trigger on this platform.
+     *
+     * @return string
+     *
+     * @throws DBALException If not supported on this platform.
+     */
+    public function getCreateTriggerSQL(Trigger $trigger, $table)
+    {
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -2916,6 +2937,18 @@ abstract class AbstractPlatform
     }
 
     /**
+     * @param string $table
+     *
+     * @return string
+     *
+     * @throws DBALException If not supported on this platform.
+     */
+    public function getListTableTriggersSQL($table)
+    {
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
      * @param string $name
      * @param string $sql
      *
@@ -2963,6 +2996,20 @@ abstract class AbstractPlatform
      * @throws DBALException If not supported on this platform.
      */
     public function getDropSequenceSQL($sequence)
+    {
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
+     * Returns the SQL snippet to drop an existing trigger.
+     *
+     * @param Trigger|string $trigger
+     *
+     * @return string
+     *
+     * @throws DBALException If not supported on this platform.
+     */
+    public function getDropTriggerSQL($trigger)
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -3357,6 +3404,16 @@ abstract class AbstractPlatform
     public function supportsViews()
     {
         return true;
+    }
+
+    /**
+     * Whether this platform supports trigger.
+     *
+     * @return bool
+     */
+    public function supportsTriggers()
+    {
+        return false;
     }
 
     /**
