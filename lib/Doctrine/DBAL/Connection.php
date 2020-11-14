@@ -1303,13 +1303,13 @@ class Connection implements DriverConnection
                 $params,
                 $types
             );
+        } finally {
+            if ($logger) {
+                $logger->stopQuery();
+            }
         }
 
         $stmt->setFetchMode($this->defaultFetchMode);
-
-        if ($logger) {
-            $logger->stopQuery();
-        }
 
         return $this->ensureForwardCompatibilityStatement($stmt);
     }
@@ -1437,13 +1437,13 @@ class Connection implements DriverConnection
             $statement = $connection->query(...$args);
         } catch (Throwable $e) {
             $this->handleExceptionDuringQuery($e, $args[0]);
+        } finally {
+            if ($logger) {
+                $logger->stopQuery();
+            }
         }
 
         $statement->setFetchMode($this->defaultFetchMode);
-
-        if ($logger) {
-            $logger->stopQuery();
-        }
 
         return $statement;
     }
@@ -1528,10 +1528,10 @@ class Connection implements DriverConnection
                 $params,
                 $types
             );
-        }
-
-        if ($logger) {
-            $logger->stopQuery();
+        } finally {
+            if ($logger) {
+                $logger->stopQuery();
+            }
         }
 
         return $result;
@@ -1567,10 +1567,10 @@ class Connection implements DriverConnection
             $result = $connection->exec($sql);
         } catch (Throwable $e) {
             $this->handleExceptionDuringQuery($e, $sql);
-        }
-
-        if ($logger) {
-            $logger->stopQuery();
+        } finally {
+            if ($logger) {
+                $logger->stopQuery();
+            }
         }
 
         return $result;
