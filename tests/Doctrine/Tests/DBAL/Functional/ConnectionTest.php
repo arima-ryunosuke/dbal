@@ -362,4 +362,33 @@ class ConnectionTest extends DbalFunctionalTestCase
             ])->ping()
         );
     }
+
+    public function testLoggingWhenError(): void
+    {
+        $config = $this->connection->getConfiguration();
+        $current = $config->getSQLLogger();
+        $logger = new \Doctrine\DBAL\Logging\DebugStack();
+        $config->setSQLLogger($logger);
+
+        $try = function ($callable, ...$args) {
+            try {
+                $callable(...$args);
+            }
+            catch (Throwable $e) {
+            }
+        };
+
+        $try([$this->connection, 'exec'], 'invalid query for exec');
+        $try([$this->connection, 'query'], 'invalid query for query');
+        $try([$this->connection, 'executeQuery'], 'invalid query for executeQuery');
+        $try([$this->connection, 'executeUpdate'], 'invalid query for executeUpdate');
+
+        $sqls = array_column($logger->queries, 'sql');
+        self::assertContains('invalid query for exec', $sqls);
+        self::assertContains('invalid query for query', $sqls);
+        self::assertContains('invalid query for executeQuery', $sqls);
+        self::assertContains('invalid query for executeUpdate', $sqls);
+
+        $config->setSQLLogger($current);
+    }
 }
