@@ -218,6 +218,10 @@ class MySQLSchemaManager extends AbstractSchemaManager
                 $length = AbstractMySQLPlatform::LENGTH_LIMIT_MEDIUMTEXT;
                 break;
 
+            case 'longtext':
+                $length = AbstractMySQLPlatform::LENGTH_LIMIT_LONGTEXT;
+                break;
+
             case 'tinyblob':
                 $length = AbstractMySQLPlatform::LENGTH_LIMIT_TINYBLOB;
                 break;
@@ -228,6 +232,10 @@ class MySQLSchemaManager extends AbstractSchemaManager
 
             case 'mediumblob':
                 $length = AbstractMySQLPlatform::LENGTH_LIMIT_MEDIUMBLOB;
+                break;
+
+            case 'longmblob':
+                $length = AbstractMySQLPlatform::LENGTH_LIMIT_LONGBLOB;
                 break;
 
             case 'tinyint':
