@@ -8,6 +8,7 @@ use Doctrine\DBAL\Platforms\SqlitePlatform;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\SchemaConfig;
 use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
@@ -851,5 +852,26 @@ class TableTest extends TestCase
         $table->addColumn('bar', 'integer');
 
         $table->removeUniqueConstraint('unique_constraint');
+    }
+
+    /* ryunosuke appendix */
+
+    public function testOrderedColumns(): void
+    {
+        $columns    = [];
+        $columns[]  = new Column('foo', Type::getType('integer'));
+        $columns[]  = new Column('bar', Type::getType('integer'));
+        $columns[]  = new Column('id', Type::getType('integer'));
+        $primary    = new Index('PK', ['id'], true, true);
+        $constraint = new ForeignKeyConstraint([], 'foo', []);
+        $table      = new Table('foo', $columns, [$primary], [], [$constraint]);
+
+        self::assertEquals(['id', 'foo', 'bar'], array_keys($table->getColumns()));
+
+        $schemaConfig = new SchemaConfig();
+        $schemaConfig->setOrderedColumn(true);
+        $table->setSchemaConfig($schemaConfig);
+
+        self::assertEquals(['foo', 'bar', 'id'], array_keys($table->getColumns()));
     }
 }

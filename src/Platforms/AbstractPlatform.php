@@ -4001,4 +4001,16 @@ abstract class AbstractPlatform
 
         return $column1->getType() === $column2->getType();
     }
+
+    /* ryunosuke appendix */
+
+    /**
+     * Whether the platform supports ordered column.
+     *
+     * @return bool
+     */
+    public function supportsOrderedColumn(): bool
+    {
+        return false;
+    }
 }
