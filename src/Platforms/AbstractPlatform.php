@@ -25,6 +25,7 @@ use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Trigger;
 use Doctrine\DBAL\Schema\UniqueConstraint;
 use Doctrine\DBAL\SQL\Parser;
 use Doctrine\DBAL\TransactionIsolationLevel;
@@ -72,6 +73,8 @@ abstract class AbstractPlatform
     public const CREATE_INDEXES = 1;
 
     public const CREATE_FOREIGNKEYS = 2;
+
+    public const CREATE_TRIGGERS = 3;
 
     /** @var string[]|null */
     protected $doctrineTypeMapping;
@@ -1547,6 +1550,14 @@ abstract class AbstractPlatform
             }
         }
 
+        if (($createFlags & self::CREATE_TRIGGERS) > 0) {
+            $options['triggers'] = [];
+
+            foreach ($table->getTriggers() as $trigger) {
+                $options['triggers'][] = $trigger;
+            }
+        }
+
         $columnSql = [];
         $columns   = [];
 
@@ -1614,6 +1625,54 @@ abstract class AbstractPlatform
         }
 
         return array_merge($sql, $columnSql);
+    }
+
+    /**
+     * Returns the SQL to create a trigger on this platform.
+     *
+     * @return string
+     *
+     * @throws Exception If not supported on this platform.
+     */
+    public function getCreateTriggerSQL(Trigger $trigger, $table)
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * @param string $table
+     *
+     * @return string
+     *
+     * @throws Exception If not supported on this platform.
+     */
+    public function getListTableTriggersSQL($table)
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * Returns the SQL snippet to drop an existing trigger.
+     *
+     * @param Trigger|string $trigger
+     *
+     * @return string
+     *
+     * @throws Exception If not supported on this platform.
+     */
+    public function getDropTriggerSQL($trigger)
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * Whether this platform supports trigger.
+     *
+     * @return bool
+     */
+    public function supportsTriggers()
+    {
+        return false;
     }
 
     protected function getCommentOnTableSQL(string $tableName, ?string $comment): string

@@ -314,7 +314,12 @@ abstract class AbstractSchemaManager
 
         $indexes = $this->listTableIndexes($name);
 
-        return new Table($name, $columns, $indexes, [], $foreignKeys);
+        $triggers = [];
+        if ($this->_platform->supportsTriggers()) {
+            $triggers = $this->listTableTriggers($name);
+        }
+
+        return new Table($name, $columns, $indexes, [], $foreignKeys, $triggers);
     }
 
     /**
@@ -353,6 +358,26 @@ abstract class AbstractSchemaManager
         $tableForeignKeys = $this->_conn->fetchAllAssociative($sql);
 
         return $this->_getPortableTableForeignKeysList($tableForeignKeys);
+    }
+
+    /**
+     * Lists the triggers for the given table.
+     *
+     * @param string      $table    The name of the table.
+     * @param string|null $database
+     *
+     * @return Trigger[]
+     */
+    public function listTableTriggers($table, $database = null)
+    {
+        if ($database === null) {
+            $database = $this->_conn->getDatabase();
+        }
+
+        $sql           = $this->_platform->getListTableTriggersSQL($table, $database);
+        $tableTriggers = $this->_conn->fetchAllAssociative($sql);
+
+        return $this->_getPortableTableTriggersList($tableTriggers);
     }
 
     /* drop*() Methods */
@@ -1092,6 +1117,37 @@ abstract class AbstractSchemaManager
     protected function _getPortableTableForeignKeyDefinition($tableForeignKey)
     {
         return $tableForeignKey;
+    }
+
+    /**
+     * @param mixed[][] $tableTriggers
+     *
+     * @return Trigger[]
+     */
+    protected function _getPortableTableTriggersList($tableTriggers)
+    {
+        $list = [];
+        foreach ($tableTriggers as $value) {
+            $value = $this->_getPortableTableTriggerDefinition($value);
+
+            if (! $value) {
+                continue;
+            }
+
+            $list[] = $value;
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param mixed $tableTrigger
+     *
+     * @return Trigger
+     */
+    protected function _getPortableTableTriggerDefinition($tableTrigger)
+    {
+        return $tableTrigger;
     }
 
     /**

@@ -93,6 +93,27 @@ class TableDiff
     public $removedForeignKeys = [];
 
     /**
+     * All added trigger
+     *
+     * @var Trigger[]
+     */
+    public $addedTriggers = [];
+
+    /**
+     * All changed trigger
+     *
+     * @var Trigger[]
+     */
+    public $changedTriggers = [];
+
+    /**
+     * All removed trigger
+     *
+     * @var Trigger[]|string[]
+     */
+    public $removedTriggers = [];
+
+    /**
      * All changed table option
      *
      * @var array

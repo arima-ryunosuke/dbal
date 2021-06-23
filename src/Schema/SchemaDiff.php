@@ -159,22 +159,27 @@ class SchemaDiff
         }
 
         $foreignKeySql = [];
+        $triggerSql = [];
         foreach ($this->newTables as $table) {
             $sql = array_merge(
                 $sql,
                 $platform->getCreateTableSQL($table, AbstractPlatform::CREATE_INDEXES)
             );
 
-            if (! $platform->supportsForeignKeyConstraints()) {
-                continue;
+            if ($platform->supportsForeignKeyConstraints()) {
+                foreach ($table->getForeignKeys() as $foreignKey) {
+                    $foreignKeySql[] = $platform->getCreateForeignKeySQL($foreignKey, $table);
+                }
             }
 
-            foreach ($table->getForeignKeys() as $foreignKey) {
-                $foreignKeySql[] = $platform->getCreateForeignKeySQL($foreignKey, $table);
+            if ($platform->supportsTriggers()) {
+                foreach ($table->getTriggers() as $trigger) {
+                    $triggerSql[] = $platform->getCreateTriggerSQL($trigger, $table);
+                }
             }
         }
 
-        $sql = array_merge($sql, $foreignKeySql);
+        $sql = array_merge($sql, $foreignKeySql, $triggerSql);
 
         if ($saveMode === false) {
             foreach ($this->removedTables as $table) {
@@ -184,6 +189,19 @@ class SchemaDiff
 
         foreach ($this->changedTables as $tableDiff) {
             $sql = array_merge($sql, $platform->getAlterTableSQL($tableDiff));
+
+            if ($platform->supportsTriggers()) {
+                foreach ($tableDiff->addedTriggers as $trigger) {
+                    $sql[] = $platform->getCreateTriggerSQL($trigger, $tableDiff->fromTable);
+                }
+                foreach ($tableDiff->changedTriggers as $trigger) {
+                    $sql[] = $platform->getDropTriggerSQL($trigger);
+                    $sql[] = $platform->getCreateTriggerSQL($trigger, $tableDiff->fromTable);
+                }
+                foreach ($tableDiff->removedTriggers as $trigger) {
+                    $sql[] = $platform->getDropTriggerSQL($trigger);
+                }
+            }
         }
 
         if ($platform->supportsViews()) {
