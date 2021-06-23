@@ -558,12 +558,12 @@ SQL;
     {
         $table = new Table('test_column_introspection');
 
-        $doctrineTypes = array_keys(Type::getTypesMap());
+        $doctrineTypes = array_keys(array_filter(Type::getTypeRegistry()->getMap(), fn($type) => ! $type instanceof \Doctrine\DBAL\Types\AnyType));
 
         foreach ($doctrineTypes as $type) {
             $table->addColumn('col_' . $type, $type, match ($type) {
                 Types::ENUM => ['values' => ['foo', 'bar']],
-                default => ['length' => 8, 'precision' => 8, 'scale' => 2],
+                default => ['length' => 6, 'precision' => 8, 'scale' => 2],
             });
         }
 
