@@ -393,4 +393,25 @@ class MySQLSchemaManager extends AbstractSchemaManager
 
         return $options;
     }
+
+    /* ryunosuke appendix */
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function _getPortableTableColumnList($table, $database, $tableColumns)
+    {
+        $columns = parent::_getPortableTableColumnList($table, $database, $tableColumns);
+
+        $before = null;
+        foreach ($columns as $n => $column) {
+            if ($before !== null) {
+                $column->setPlatformOption('beforeColumn', $before);
+            }
+
+            $before = $n;
+        }
+
+        return $columns;
+    }
 }
