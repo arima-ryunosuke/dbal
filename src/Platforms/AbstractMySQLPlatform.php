@@ -1565,4 +1565,20 @@ SQL
     {
         return true;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsReplaceView()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getReplaceViewSQL($name, $sql)
+    {
+        return 'CREATE OR REPLACE VIEW ' . $name . ' AS ' . $sql;
+    }
 }
