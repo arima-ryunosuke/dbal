@@ -701,13 +701,12 @@ class Table extends AbstractAsset
     public function getColumns()
     {
         $primaryKeyColumns = $this->hasPrimaryKey() ? $this->getPrimaryKeyColumns() : [];
-        $foreignKeyColumns = $this->getForeignKeyColumns();
         $remainderColumns  = $this->filterColumns(
-            array_merge(array_keys($primaryKeyColumns), array_keys($foreignKeyColumns)),
+            array_merge(array_keys($primaryKeyColumns)),
             true
         );
 
-        return array_merge($primaryKeyColumns, $foreignKeyColumns, $remainderColumns);
+        return array_merge($primaryKeyColumns, $remainderColumns);
     }
 
     /**
