@@ -213,6 +213,14 @@ class MySQLPlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
+    public function getReplaceViewSQL($name, $sql)
+    {
+        return 'CREATE OR REPLACE VIEW ' . $name . ' AS ' . $sql;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public function getDropViewSQL($name)
     {
         return 'DROP VIEW ' . $name;
@@ -1248,6 +1256,14 @@ SQL
     }
 
     public function supportsColumnLengthIndexes(): bool
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsReplaceView()
     {
         return true;
     }
