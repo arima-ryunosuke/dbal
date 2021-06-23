@@ -8,6 +8,7 @@ use Doctrine\DBAL\Schema\SchemaDiff;
 use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Trigger;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -28,8 +29,13 @@ class SchemaDiffTest extends TestCase
             'create_seq',
             'create_table',
             'create_foreign_key',
+            'create_trigger',
             'drop_table',
             'alter_table',
+            'create_trigger',
+            'drop_trigger',
+            'create_trigger',
+            'drop_trigger',
         ], $sql);
     }
 
@@ -40,7 +46,19 @@ class SchemaDiffTest extends TestCase
 
         $sql = $diff->toSaveSql($platform);
 
-        $expected = ['create_schema', 'alter_seq', 'create_seq', 'create_table', 'create_foreign_key', 'alter_table'];
+        $expected = [
+            'create_schema',
+            'alter_seq',
+            'create_seq',
+            'create_table',
+            'create_foreign_key',
+            'create_trigger',
+            'alter_table',
+            'create_trigger',
+            'drop_trigger',
+            'create_trigger',
+            'drop_trigger',
+        ];
 
         self::assertEquals($expected, $sql);
     }
@@ -99,6 +117,14 @@ class SchemaDiffTest extends TestCase
                      ->will(self::returnValue('drop_orphan_fk'));
         }
 
+        $platform->expects($this->exactly(3))
+            ->method('getCreateTriggerSQL')
+            ->with($this->isInstanceOf(Trigger::class))
+            ->will($this->returnValue('create_trigger'));
+        $platform->expects($this->exactly(2))
+            ->method('getDropTriggerSQL')
+            ->with($this->isInstanceOf(Trigger::class))
+            ->will($this->returnValue('drop_trigger'));
         $platform->expects(self::exactly(1))
                 ->method('supportsSchemas')
                 ->will(self::returnValue(true));
@@ -108,6 +134,9 @@ class SchemaDiffTest extends TestCase
         $platform->expects(self::exactly(2))
                 ->method('supportsForeignKeyConstraints')
                 ->will(self::returnValue(true));
+        $platform->expects($this->exactly(2))
+            ->method('supportsTriggers')
+            ->will($this->returnValue(true));
 
         return $platform;
     }
@@ -128,6 +157,10 @@ class SchemaDiffTest extends TestCase
         $fk = new ForeignKeyConstraint(['id'], 'foreign_table', ['id']);
         $fk->setLocalTable(new Table('local_table'));
         $diff->orphanedForeignKeys[] = $fk;
+        $diff->newTables['foo_table']->addTrigger('new_trg', 'dummy');
+        $diff->changedTables['baz_table']->addedTriggers[] = new Trigger('added_trigger', 'dummy');
+        $diff->changedTables['baz_table']->changedTriggers[] = new Trigger('changed_trigger', 'dummy');
+        $diff->changedTables['baz_table']->removedTriggers[] = new Trigger('removed_trigger', 'dummy');
 
         return $diff;
     }

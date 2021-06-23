@@ -15,6 +15,7 @@ use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Trigger;
 use Doctrine\DBAL\Schema\UniqueConstraint;
 use Doctrine\DBAL\Types\Type;
 use InvalidArgumentException;
@@ -247,6 +248,31 @@ abstract class AbstractPlatformTestCase extends TestCase
     }
 
     abstract protected function getGenerateForeignKeySql(): string;
+
+    public function testGeneratesTriggerSql(): void
+    {
+        $trigger = new Trigger('trg_dummy', 'statement', [
+            'Event'  => 'INSERT',
+            'Timing' => 'AFTER',
+        ]);
+
+        if ($this->platform->supportsTriggers()) {
+            $expected = $this->getGenerateTriggerSql();
+            self::assertEquals(
+                $expected['create'],
+                $this->platform->getCreateTriggerSQL($trigger, 'test')
+            );
+            self::assertEquals(
+                $expected['drop'],
+                $this->platform->getDropTriggerSQL($trigger)
+            );
+        } else {
+            $this->expectException(Exception::class);
+            $this->platform->getCreateTriggerSQL($trigger, 'test');
+        }
+    }
+
+    public function getGenerateTriggerSql() : array { }
 
     public function testGeneratesConstraintCreationSql(): void
     {

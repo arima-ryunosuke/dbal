@@ -324,6 +324,33 @@ class Comparator
             $changes++;
         }
 
+        $table1Triggers = $fromTable->getTriggers();
+        $table2Triggers = $toTable->getTriggers();
+
+        foreach ($table1Triggers as $key1 => $trigger1) {
+            foreach ($table2Triggers as $key2 => $trigger2) {
+                if ($this->diffTrigger($trigger1, $trigger2) === false) {
+                    unset($table1Triggers[$key1], $table2Triggers[$key2]);
+                } else {
+                    if (strtolower($trigger1->getName()) === strtolower($trigger2->getName())) {
+                        $tableDifferences->changedTriggers[] = $trigger2;
+                        $changes++;
+                        unset($table1Triggers[$key1], $table2Triggers[$key2]);
+                    }
+                }
+            }
+        }
+
+        foreach ($table1Triggers as $trigger1) {
+            $tableDifferences->removedTriggers[] = $trigger1;
+            $changes++;
+        }
+
+        foreach ($table2Triggers as $trigger2) {
+            $tableDifferences->addedTriggers[] = $trigger2;
+            $changes++;
+        }
+
         $array_diff_assoc_recursive = function ($array1, $array2) use (&$array_diff_assoc_recursive) {
             $difference = [];
             foreach ($array1 as $key => $value) {
@@ -465,6 +492,22 @@ class Comparator
         }
 
         return $key1->onDelete() !== $key2->onDelete();
+    }
+
+    /**
+     * @return bool
+     */
+    public function diffTrigger(Trigger $trigger1, Trigger $trigger2)
+    {
+        if ($trigger1->getStatement() !== $trigger2->getStatement()) {
+            return true;
+        }
+
+        if ($trigger1->getOptions() != $trigger2->getOptions()) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

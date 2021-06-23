@@ -615,6 +615,61 @@ class ComparatorTest extends TestCase
         self::assertCount(1, $tableDiff->changedForeignKeys);
     }
 
+    public function testTableAddTrigger(): void
+    {
+        $table1 = new Table('foo');
+
+        $table2 = new Table('foo');
+        $table2->addTrigger('trg', 'statement', [
+            'Timing' => 'BEFORE',
+            'Event'  => 'INSERT',
+        ]);
+
+        $c         = new Comparator();
+        $tableDiff = $c->diffTable($table1, $table2);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertCount(1, $tableDiff->addedTriggers);
+    }
+
+    public function testTableRemoveTrigger(): void
+    {
+        $table1 = new Table('foo');
+
+        $table2 = new Table('foo');
+        $table2->addTrigger('trg', 'statement', [
+            'Timing' => 'BEFORE',
+            'Event'  => 'INSERT',
+        ]);
+
+        $c         = new Comparator();
+        $tableDiff = $c->diffTable($table2, $table1);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertCount(1, $tableDiff->removedTriggers);
+    }
+
+    public function testTableUpdateTrigger(): void
+    {
+        $table1 = new Table('foo');
+        $table1->addTrigger('trg', 'statement1', [
+            'Timing' => 'BEFORE',
+            'Event'  => 'INSERT',
+        ]);
+
+        $table2 = new Table('foo');
+        $table2->addTrigger('trg', 'statement2', [
+            'Timing' => 'BEFORE',
+            'Event'  => 'INSERT',
+        ]);
+
+        $c         = new Comparator();
+        $tableDiff = $c->diffTable($table2, $table1);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertCount(1, $tableDiff->changedTriggers);
+    }
+
     public function testTableOptions(): void
     {
         $table1 = new Table("foo");
