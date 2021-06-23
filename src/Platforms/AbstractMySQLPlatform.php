@@ -1195,4 +1195,9 @@ SQL
 
         return $this->getCurrentDatabaseExpression();
     }
+
+    /* ryunosuke appendix */
+
+    public const LENGTH_LIMIT_LONGTEXT = 4294967295;
+    public const LENGTH_LIMIT_LONGBLOB = 4294967295;
 }
