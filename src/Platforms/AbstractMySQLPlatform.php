@@ -632,6 +632,34 @@ SQL
             $queryParts[] = 'RENAME TO ' . $newName->getQuotedName($this);
         }
 
+        // unset changedColumn that POSITIONAL diff only
+        foreach ($diff->changedColumns as $name => $columnDiff) {
+            if ($columnDiff->changedProperties === ['beforeColumn']) {
+                foreach ($diff->addedColumns as $addedColumns) {
+                    if ($addedColumns->getName() === $columnDiff->column->getPlatformOption('beforeColumn')) {
+                        unset($diff->changedColumns[$name]);
+                    }
+                }
+                foreach ($diff->removedColumns as $removedColumns) {
+                    if ($removedColumns->getName() === $columnDiff->fromColumn->getPlatformOption('beforeColumn')) {
+                        unset($diff->changedColumns[$name]);
+                    }
+                }
+            }
+        }
+
+        // closure for FIRST/AFTER suffix
+        $positional = function ($columnArray) {
+            if (array_key_exists('beforeColumn', $columnArray)) {
+                if ($columnArray['beforeColumn']) {
+                    return " AFTER " . $columnArray['beforeColumn'];
+                } else {
+                    return " FIRST";
+                }
+            }
+            return null;
+        };
+
         foreach ($diff->getAddedColumns() as $column) {
             if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
                 continue;
@@ -644,7 +672,7 @@ SQL
             $queryParts[] = 'ADD ' . $this->getColumnDeclarationSQL(
                 $column->getQuotedName($this),
                 $columnProperties,
-            );
+            ) . $positional($columnProperties);
         }
 
         foreach ($diff->getDroppedColumns() as $column) {
@@ -669,7 +697,8 @@ SQL
             $oldColumn = $columnDiff->getOldColumn() ?? $columnDiff->getOldColumnName();
 
             $queryParts[] =  'CHANGE ' . $oldColumn->getQuotedName($this) . ' '
-                . $this->getColumnDeclarationSQL($newColumn->getQuotedName($this), $newColumnProperties);
+                . $this->getColumnDeclarationSQL($newColumn->getQuotedName($this), $newColumnProperties)
+                . $positional($newColumnProperties);
         }
 
         foreach ($diff->getRenamedColumns() as $oldColumnName => $column) {
@@ -1436,4 +1465,12 @@ SQL
 
     public const LENGTH_LIMIT_LONGTEXT = 4294967295;
     public const LENGTH_LIMIT_LONGBLOB = 4294967295;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function supportsOrderedColumn(): bool
+    {
+        return true;
+    }
 }

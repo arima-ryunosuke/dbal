@@ -4648,4 +4648,16 @@ abstract class AbstractPlatform
     {
         throw Exception::notSupported(__METHOD__);
     }
+
+    /* ryunosuke appendix */
+
+    /**
+     * Whether the platform supports ordered column.
+     *
+     * @return bool
+     */
+    public function supportsOrderedColumn(): bool
+    {
+        return false;
+    }
 }

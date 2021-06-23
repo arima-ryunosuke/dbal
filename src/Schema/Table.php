@@ -705,6 +705,10 @@ class Table extends AbstractAsset
      */
     public function getColumns()
     {
+        if ($this->_schemaConfig instanceof SchemaConfig && $this->_schemaConfig->getOrderedColumn()) {
+            return $this->_columns;
+        }
+
         $primaryKeyColumns = $this->getPrimaryKey() !== null ? $this->getPrimaryKeyColumns() : [];
         $foreignKeyColumns = $this->getForeignKeyColumns();
         $remainderColumns  = $this->filterColumns(
