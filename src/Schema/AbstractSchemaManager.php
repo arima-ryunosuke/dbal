@@ -327,7 +327,12 @@ abstract class AbstractSchemaManager
 
         $indexes = $this->listTableIndexes($name);
 
-        return new Table($name, $columns, $indexes, [], $foreignKeys);
+        $triggers = [];
+        if ($this->_platform->supportsTriggers()) {
+            $triggers = $this->listTableTriggers($name);
+        }
+
+        return new Table($name, $columns, $indexes, [], $foreignKeys, $triggers);
     }
 
     /**
@@ -523,7 +528,7 @@ abstract class AbstractSchemaManager
      */
     public function createTable(Table $table)
     {
-        $createFlags = AbstractPlatform::CREATE_INDEXES | AbstractPlatform::CREATE_FOREIGNKEYS;
+        $createFlags = AbstractPlatform::CREATE_INDEXES | AbstractPlatform::CREATE_FOREIGNKEYS | AbstractPlatform::CREATE_TRIGGERS;
         $this->_execSql($this->_platform->getCreateTableSQL($table, $createFlags));
     }
 
@@ -1341,5 +1346,58 @@ abstract class AbstractSchemaManager
     public function createComparator(): Comparator
     {
         return new Comparator($this->getDatabasePlatform());
+    }
+
+    /* ryunosuke appendix */
+
+    /**
+     * Lists the triggers for the given table.
+     *
+     * @param string      $table    The name of the table.
+     * @param string|null $database
+     *
+     * @return Trigger[]
+     */
+    public function listTableTriggers($table, $database = null)
+    {
+        if ($database === null) {
+            $database = $this->_conn->getDatabase();
+        }
+
+        $sql           = $this->_platform->getListTableTriggersSQL($table, $database);
+        $tableTriggers = $this->_conn->fetchAllAssociative($sql);
+
+        return $this->_getPortableTableTriggersList($tableTriggers);
+    }
+
+    /**
+     * @param mixed[][] $tableTriggers
+     *
+     * @return Trigger[]
+     */
+    protected function _getPortableTableTriggersList($tableTriggers)
+    {
+        $list = [];
+        foreach ($tableTriggers as $value) {
+            $value = $this->_getPortableTableTriggerDefinition($value);
+
+            if (! $value) {
+                continue;
+            }
+
+            $list[] = $value;
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param mixed $tableTrigger
+     *
+     * @return Trigger
+     */
+    protected function _getPortableTableTriggerDefinition($tableTrigger)
+    {
+        return $tableTrigger;
     }
 }

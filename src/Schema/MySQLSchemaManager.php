@@ -428,4 +428,18 @@ class MySQLSchemaManager extends AbstractSchemaManager
 
         return $columns;
     }
+
+    protected function _getPortableTableTriggersList($tableTriggers)
+    {
+        $list = [];
+        foreach ($tableTriggers as $value) {
+            $trigger = new Trigger($value['Trigger'], $value['Statement'], [
+                'Timing' => $value['Timing'],
+                'Event'  => $value['Event'],
+            ]);
+            $list[] = $trigger;
+        }
+
+        return $list;
+    }
 }
