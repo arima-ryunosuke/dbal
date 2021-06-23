@@ -1286,4 +1286,22 @@ class ComparatorTest extends TestCase
         self::assertCount(1, $actual->changedTables['table2']->addedForeignKeys, 'FK to table3 should be added.');
         self::assertEquals('table3', $actual->changedTables['table2']->addedForeignKeys[0]->getForeignTableName());
     }
+
+    /* ryunosuke appendix */
+
+    public function testChangeTableOption(): void
+    {
+        $tableA = new Table('foo');
+        $tableA->addColumn('id', 'integer');
+        $tableA->addOption('comment', 'A-table');
+
+        $tableB = new Table('foo');
+        $tableB->addColumn('id', 'integer');
+        $tableB->addOption('comment', 'B-table');
+
+        $tableDiff = $this->comparator->diffTable($tableA, $tableB);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertArrayHasKey('comment', $tableDiff->changedOptions);
+    }
 }

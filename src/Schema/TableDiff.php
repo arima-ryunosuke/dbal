@@ -149,4 +149,9 @@ class TableDiff
 
         return new Identifier($this->newName);
     }
+
+    /* ryunosuke appendix */
+
+    /** @var array All changed table option */
+    public $changedOptions = [];
 }

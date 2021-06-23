@@ -434,6 +434,10 @@ class MySQLSchemaManagerTest extends SchemaManagerFunctionalTestCase
         self::assertSame($currentTimeStampSql, $onlineTable->getColumn('col_datetime')->getDefault());
         self::assertSame($currentTimeStampSql, $onlineTable->getColumn('col_datetime_nullable')->getDefault());
 
+        foreach ($onlineTable->getOptions() as $name => $value) {
+            $table->addOption($name, $value);
+        }
+
         $diff = $this->schemaManager->createComparator()->diffTable($table, $onlineTable);
         self::assertFalse($diff, 'Tables should be identical with column defaults.');
     }

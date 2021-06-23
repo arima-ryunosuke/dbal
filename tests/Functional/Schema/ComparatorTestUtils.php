@@ -22,8 +22,13 @@ final class ComparatorTestUtils
         Comparator $comparator,
         Table $table
     ) {
+        $onlineTable = $schemaManager->listTableDetails($table->getName());
+        foreach ($onlineTable->getOptions() as $name => $value) {
+            $table->addOption($name, $value);
+        }
+
         return $comparator->diffTable(
-            $schemaManager->listTableDetails($table->getName()),
+            $onlineTable,
             $table
         );
     }
