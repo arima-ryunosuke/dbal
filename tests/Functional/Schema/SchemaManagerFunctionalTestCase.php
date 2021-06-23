@@ -221,7 +221,7 @@ abstract class SchemaManagerFunctionalTestCase extends FunctionalTestCase
         $table = new Table('list_table_columns');
         $table->addColumn('id', 'integer', ['notnull' => true]);
         $table->addColumn('test', 'string', ['length' => 255, 'notnull' => false, 'default' => 'expected default']);
-        $table->addColumn('foo', 'text', ['notnull' => true]);
+        $table->addColumn('foo', 'text', ['length' => 255, 'notnull' => true]);
         $table->addColumn('bar', 'decimal', ['precision' => 10, 'scale' => 4, 'notnull' => false]);
         $table->addColumn('baz1', 'datetime');
         $table->addColumn('baz2', 'time');

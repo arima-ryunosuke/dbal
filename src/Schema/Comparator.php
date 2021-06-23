@@ -467,7 +467,8 @@ class Comparator
 
         if (
             ($properties1['type'] instanceof Types\StringType && ! $properties1['type'] instanceof Types\GuidType) ||
-            $properties1['type'] instanceof Types\BinaryType
+            $properties1['type'] instanceof Types\BinaryType ||
+            $properties1['type'] instanceof Types\TextType || $properties1['type'] instanceof Types\BlobType
         ) {
             // check if value of length is set at all, default value assumed otherwise.
             $length1 = $properties1['length'] ?? 255;

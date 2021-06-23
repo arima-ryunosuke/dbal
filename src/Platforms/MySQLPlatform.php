@@ -41,10 +41,12 @@ class MySQLPlatform extends AbstractPlatform
     public const LENGTH_LIMIT_TINYTEXT   = 255;
     public const LENGTH_LIMIT_TEXT       = 65535;
     public const LENGTH_LIMIT_MEDIUMTEXT = 16777215;
+    public const LENGTH_LIMIT_LONGTEXT   = 4294967295;
 
     public const LENGTH_LIMIT_TINYBLOB   = 255;
     public const LENGTH_LIMIT_BLOB       = 65535;
     public const LENGTH_LIMIT_MEDIUMBLOB = 16777215;
+    public const LENGTH_LIMIT_LONGBLOB   = 4294967295;
 
     /**
      * {@inheritDoc}
