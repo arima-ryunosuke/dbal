@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  mysql:
+    image: docker.io/mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: Password1234
+      TZ: 'Asia/Tokyo'
+    ports:
+      - 23306:3306
+  pgsql:
+    image: docker.io/postgres:latest
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: Password1234
+      TZ: 'Asia/Tokyo'
+    ports:
+      - 25432:5432
