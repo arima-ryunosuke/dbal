@@ -628,4 +628,41 @@ SQL;
 
         return $columns;
     }
+
+    protected function _getPortableTableTriggerDefinition($tableTrigger)
+    {
+        return new Trigger($tableTrigger['Trigger'], $tableTrigger['Statement'], [
+            'Timing' => $tableTrigger['Timing'],
+            'Event'  => $tableTrigger['Event'],
+        ]);
+    }
+
+    protected function selectTableTriggers(string $databaseName, ?string $tableName = null): Result
+    {
+        $sql = 'SELECT';
+
+        if ($tableName === null) {
+            $sql .= ' EVENT_OBJECT_TABLE,';
+        }
+
+        $sql .= <<<'SQL'
+                TRIGGER_NAME       AS `Trigger`,
+                EVENT_MANIPULATION AS `Event`,
+                ACTION_STATEMENT   AS `Statement`,
+                ACTION_TIMING      AS `Timing`
+            FROM information_schema.TRIGGERS
+        SQL;
+
+        $conditions = ['TRIGGER_SCHEMA = ?'];
+        $params     = [$databaseName];
+
+        if ($tableName !== null) {
+            $conditions[] = 'EVENT_OBJECT_TABLE = ?';
+            $params[]     = $tableName;
+        }
+
+        $sql .= ' WHERE ' . implode(' AND ', $conditions) . ' ORDER BY TRIGGER_NAME';
+
+        return $this->_conn->executeQuery($sql, $params);
+    }
 }

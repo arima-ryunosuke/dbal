@@ -357,10 +357,32 @@ class TableDiff
             && count($this->addedForeignKeys) === 0
             && count($this->changedForeignKeys) === 0
             && count($this->removedForeignKeys) === 0
+            && count($this->changedTriggers) === 0
             && count($this->changedOptions) === 0;
     }
 
     /* ryunosuke appendix */
+
+    /**
+     * All added trigger
+     *
+     * @var Trigger[]
+     */
+    public $addedTriggers = [];
+
+    /**
+     * All changed trigger
+     *
+     * @var Trigger[]
+     */
+    public $changedTriggers = [];
+
+    /**
+     * All removed trigger
+     *
+     * @var Trigger[]|string[]
+     */
+    public $removedTriggers = [];
 
     /** @var array All changed table option */
     public $changedOptions = [];

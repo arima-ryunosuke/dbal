@@ -1050,4 +1050,12 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
             ])
         );
     }
+
+    public function getGenerateTriggerSql(): array
+    {
+        return [
+            'create' => 'CREATE TRIGGER trg_dummy AFTER INSERT ON test FOR EACH ROW statement',
+            'drop'   => 'DROP TRIGGER trg_dummy',
+        ];
+    }
 }

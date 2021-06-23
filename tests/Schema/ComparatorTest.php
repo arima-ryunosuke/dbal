@@ -1391,4 +1391,56 @@ class ComparatorTest extends TestCase
         self::assertSame($changedView, $diffSchema->changedViews[0]);
         self::assertSame($removedView, $diffSchema->removedViews[0]);
     }
+
+    public function testTableAddTrigger(): void
+    {
+        $table1 = new Table('foo');
+
+        $table2 = new Table('foo');
+        $table2->addTrigger('trg', 'statement', [
+            'Timing' => 'BEFORE',
+            'Event'  => 'INSERT',
+        ]);
+
+        $tableDiff = $this->comparator->compareTables($table1, $table2);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertCount(1, $tableDiff->addedTriggers);
+    }
+
+    public function testTableRemoveTrigger(): void
+    {
+        $table1 = new Table('foo');
+
+        $table2 = new Table('foo');
+        $table2->addTrigger('trg', 'statement', [
+            'Timing' => 'BEFORE',
+            'Event'  => 'INSERT',
+        ]);
+
+        $tableDiff = $this->comparator->compareTables($table2, $table1);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertCount(1, $tableDiff->removedTriggers);
+    }
+
+    public function testTableUpdateTrigger(): void
+    {
+        $table1 = new Table('foo');
+        $table1->addTrigger('trg', 'statement1', [
+            'Timing' => 'BEFORE',
+            'Event'  => 'INSERT',
+        ]);
+
+        $table2 = new Table('foo');
+        $table2->addTrigger('trg', 'statement2', [
+            'Timing' => 'BEFORE',
+            'Event'  => 'INSERT',
+        ]);
+
+        $tableDiff = $this->comparator->compareTables($table2, $table1);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertCount(1, $tableDiff->changedTriggers);
+    }
 }

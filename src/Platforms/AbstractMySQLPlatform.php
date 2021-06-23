@@ -11,6 +11,7 @@ use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\MySQLSchemaManager;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Trigger;
 use Doctrine\DBAL\TransactionIsolationLevel;
 use Doctrine\DBAL\Types\BlobType;
 use Doctrine\DBAL\Types\TextType;
@@ -456,6 +457,13 @@ SQL
                         . ' Define foreign key constraints only if they are necessary.',
                 );
             }
+
+            foreach ($table->getTriggers() as $trigger) {
+                $sql[] = $this->getCreateTriggerSQL(
+                    $trigger,
+                    $table->getQuotedName($this),
+                );
+            }
         }
 
         return $sql;
@@ -513,6 +521,12 @@ SQL
                     . ' other than InnoDB is deprecated.'
                     . ' Define foreign key constraints only if they are necessary.',
                 );
+            }
+        }
+
+        if (isset($options['triggers'])) {
+            foreach ((array) $options['triggers'] as $definition) {
+                $sql[] = $this->getCreateTriggerSQL($definition, $name);
             }
         }
 
@@ -796,6 +810,19 @@ SQL
                 $sql,
                 $this->getPostAlterTableIndexForeignKeySQL($diff),
             );
+
+            foreach ($diff->addedTriggers as $trigger) {
+                $sql[] = $this->getCreateTriggerSQL($trigger, $diff->fromTable);
+            }
+
+            foreach ($diff->changedTriggers as $trigger) {
+                $sql[] = $this->getDropTriggerSQL($trigger);
+                $sql[] = $this->getCreateTriggerSQL($trigger, $diff->fromTable);
+            }
+
+            foreach ($diff->removedTriggers as $trigger) {
+                $sql[] = $this->getDropTriggerSQL($trigger);
+            }
         }
 
         return array_merge($sql, $tableSql, $columnSql);
@@ -1580,5 +1607,44 @@ SQL
     public function getReplaceViewSQL($name, $sql)
     {
         return 'CREATE OR REPLACE VIEW ' . $name . ' AS ' . $sql;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function supportsTriggers()
+    {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getCreateTriggerSQL(Trigger $trigger, $table)
+    {
+        if ($table instanceof Table) {
+            $table = $table->getQuotedName($this);
+        }
+
+        $triggerName = $trigger->getQuotedName($this);
+        $statement = $trigger->getStatement();
+        $options = $trigger->getOptions();
+        $timing = $options['Timing'] ?? null;
+        $event = $options['Event'] ?? null;
+        $foreach = 'ROW'; // mysql is not supported "FOR EACH STATEMENT"
+
+        return "CREATE TRIGGER $triggerName $timing $event ON $table FOR EACH $foreach $statement";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getDropTriggerSQL($trigger)
+    {
+        if ($trigger instanceof Trigger) {
+            $trigger = $trigger->getQuotedName($this);
+        }
+
+        return "DROP TRIGGER $trigger";
     }
 }

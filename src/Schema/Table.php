@@ -54,6 +54,7 @@ class Table extends AbstractAsset
      * @param Index[]                $indexes
      * @param UniqueConstraint[]     $uniqueConstraints
      * @param ForeignKeyConstraint[] $fkConstraints
+     * @param Trigger[]              $triggers
      * @param mixed[]                $options
      *
      * @throws SchemaException
@@ -65,6 +66,7 @@ class Table extends AbstractAsset
         array $indexes = [],
         array $uniqueConstraints = [],
         array $fkConstraints = [],
+        array $triggers = [],
         array $options = []
     ) {
         if ($name === '') {
@@ -87,6 +89,10 @@ class Table extends AbstractAsset
 
         foreach ($fkConstraints as $constraint) {
             $this->_addForeignKeyConstraint($constraint);
+        }
+
+        foreach ($triggers as $trigger) {
+            $this->_addTrigger($trigger);
         }
 
         $this->_options = array_merge($this->_options, $options);
@@ -1041,5 +1047,84 @@ class Table extends AbstractAsset
     public function getComment(): ?string
     {
         return $this->_options['comment'] ?? null;
+    }
+
+    /* ryunosuke appendix */
+
+    /** @var Trigger[] */
+    protected $_triggers = [];
+
+    /**
+     * @param string  $triggerName
+     * @param string  $statement
+     * @param mixed[] $options
+     *
+     * @return Trigger
+     */
+    public function addTrigger($triggerName, $statement, array $options = [])
+    {
+        $trigger = new Trigger($triggerName, $statement, $options);
+
+        $this->_addTrigger($trigger);
+
+        return $trigger;
+    }
+
+    /**
+     * Returns whether this table has a Trigger with the given name.
+     *
+     * @param string $triggerName The Trigger name.
+     *
+     * @return bool
+     */
+    public function hasTrigger($triggerName)
+    {
+        $triggerName = $this->normalizeIdentifier($triggerName);
+
+        return isset($this->_triggers[$triggerName]);
+    }
+
+    /**
+     * Drops an trigger from this table.
+     *
+     * @param string $triggerName The trigger name.
+     *
+     * @return void
+     *
+     * @throws SchemaException If the trigger does not exist.
+     */
+    public function dropTrigger($triggerName)
+    {
+        $triggerName = $this->normalizeIdentifier($triggerName);
+        if (! $this->hasTrigger($triggerName)) {
+            throw SchemaException::triggerDoesNotExist($triggerName, $this->_name);
+        }
+        unset($this->_triggers[$triggerName]);
+    }
+
+    /**
+     * @return self
+     */
+    protected function _addTrigger(Trigger $trigger)
+    {
+        $trigger->setTable($this);
+
+        $triggerName = $this->normalizeIdentifier($trigger->getName());
+
+        if (isset($this->_triggers[$triggerName])) {
+            throw SchemaException::triggerAlreadyExists($triggerName, $this->_name);
+        }
+
+        $this->_triggers[$triggerName] = $trigger;
+
+        return $this;
+    }
+
+    /**
+     * @return Trigger[]
+     */
+    public function getTriggers()
+    {
+        return $this->_triggers;
     }
 }

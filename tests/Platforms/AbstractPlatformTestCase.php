@@ -17,6 +17,7 @@ use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\SchemaDiff;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Trigger;
 use Doctrine\DBAL\Schema\UniqueConstraint;
 use Doctrine\DBAL\Types\StringType;
 use Doctrine\DBAL\Types\Type;
@@ -1408,6 +1409,33 @@ abstract class AbstractPlatformTestCase extends TestCase
         Type::getTypeRegistry()->override(Types::STRING, $this->backedUpType);
         $this->backedUpType = null;
     }
+
+    /* ryunosuke appendix */
+
+    public function testGeneratesTriggerSql(): void
+    {
+        $trigger = new Trigger('trg_dummy', 'statement', [
+            'Event'  => 'INSERT',
+            'Timing' => 'AFTER',
+        ]);
+
+        if ($this->platform->supportsTriggers()) {
+            $expected = $this->getGenerateTriggerSql();
+            self::assertEquals(
+                $expected['create'],
+                $this->platform->getCreateTriggerSQL($trigger, 'test')
+            );
+            self::assertEquals(
+                $expected['drop'],
+                $this->platform->getDropTriggerSQL($trigger)
+            );
+        } else {
+            $this->expectException(Exception::class);
+            $this->platform->getCreateTriggerSQL($trigger, 'test');
+        }
+    }
+
+    public function getGenerateTriggerSql() : array { }
 }
 
 interface GetCreateTableSqlDispatchEventListener

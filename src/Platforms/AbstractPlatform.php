@@ -28,6 +28,7 @@ use Doctrine\DBAL\Schema\SchemaDiff;
 use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Schema\Trigger;
 use Doctrine\DBAL\Schema\UniqueConstraint;
 use Doctrine\DBAL\SQL\Parser;
 use Doctrine\DBAL\TransactionIsolationLevel;
@@ -2041,6 +2042,7 @@ abstract class AbstractPlatform
             $table,
             ($createFlags & self::CREATE_INDEXES) > 0,
             ($createFlags & self::CREATE_FOREIGNKEYS) > 0,
+            ($createFlags & self::CREATE_TRIGGERS) > 0,
         );
     }
 
@@ -2053,7 +2055,7 @@ abstract class AbstractPlatform
      */
     final protected function getCreateTableWithoutForeignKeysSQL(Table $table): array
     {
-        return $this->buildCreateTableSQL($table, true, false);
+        return $this->buildCreateTableSQL($table, true, false, false);
     }
 
     /**
@@ -2061,7 +2063,7 @@ abstract class AbstractPlatform
      *
      * @throws Exception
      */
-    private function buildCreateTableSQL(Table $table, bool $createIndexes, bool $createForeignKeys): array
+    private function buildCreateTableSQL(Table $table, bool $createIndexes, bool $createForeignKeys, bool $createTriggers): array
     {
         if (count($table->getColumns()) === 0) {
             throw Exception::noColumnsSpecifiedForTable($table->getName());
@@ -2095,6 +2097,14 @@ abstract class AbstractPlatform
 
             foreach ($table->getForeignKeys() as $fkConstraint) {
                 $options['foreignKeys'][] = $fkConstraint;
+            }
+        }
+
+        if ($createTriggers) {
+            $options['triggers'] = [];
+
+            foreach ($table->getTriggers() as $trigger) {
+                $options['triggers'][] = $trigger;
             }
         }
 
@@ -4651,6 +4661,8 @@ abstract class AbstractPlatform
 
     /* ryunosuke appendix */
 
+    public const CREATE_TRIGGERS = 4;
+
     /**
      * Whether the platform supports ordered column.
      *
@@ -4682,5 +4694,41 @@ abstract class AbstractPlatform
     public function getReplaceViewSQL($name, $sql)
     {
         throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * Returns the SQL to create a trigger on this platform.
+     *
+     * @return string
+     *
+     * @throws Exception If not supported on this platform.
+     */
+    public function getCreateTriggerSQL(Trigger $trigger, $table)
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * Returns the SQL snippet to drop an existing trigger.
+     *
+     * @param Trigger|string $trigger
+     *
+     * @return string
+     *
+     * @throws Exception If not supported on this platform.
+     */
+    public function getDropTriggerSQL($trigger)
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * Whether this platform supports trigger.
+     *
+     * @return bool
+     */
+    public function supportsTriggers()
+    {
+        return false;
     }
 }
