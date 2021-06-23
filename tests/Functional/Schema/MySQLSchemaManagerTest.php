@@ -558,7 +558,7 @@ SQL;
     {
         $table = new Table('test_column_introspection');
 
-        $doctrineTypes = array_keys(Type::getTypesMap());
+        $doctrineTypes = array_keys(array_filter(Type::getTypeRegistry()->getMap(), fn($type) => ! $type instanceof \Doctrine\DBAL\Types\AnyType));
 
         foreach ($doctrineTypes as $type) {
             $table->addColumn('col_' . $type, $type);
