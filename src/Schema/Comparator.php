@@ -427,7 +427,7 @@ class Comparator
             $addedForeignKeys[] = $toConstraint;
         }
 
-        return new TableDiff(
+        $tableDifferences = new TableDiff(
             $toTable->getName(),
             $addedColumns,
             $modifiedColumns,
@@ -442,6 +442,28 @@ class Comparator
             $renamedColumns,
             $renamedIndexes,
         );
+
+        $array_diff_assoc_recursive = function ($array1, $array2) use (&$array_diff_assoc_recursive) {
+            $difference = [];
+            foreach ($array1 as $key => $value) {
+                if (is_array($value)) {
+                    if (array_key_exists($key, $array2) && ! is_array($array2[$key])) {
+                        $difference[$key] = $value;
+                    } else {
+                        $new_diff = $array_diff_assoc_recursive($value, $array2[$key]);
+                        if ($new_diff) {
+                            $difference[$key] = $new_diff;
+                        }
+                    }
+                } elseif (array_key_exists($key, $array2) && $array2[$key] != $value) {
+                    $difference[$key] = $value;
+                }
+            }
+            return $difference;
+        };
+        $tableDifferences->changedOptions = $array_diff_assoc_recursive($toTable->getOptions(), $fromTable->getOptions());
+
+        return $tableDifferences;
     }
 
     /**

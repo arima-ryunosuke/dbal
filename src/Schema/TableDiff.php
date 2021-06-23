@@ -356,6 +356,12 @@ class TableDiff
             && count($this->renamedIndexes) === 0
             && count($this->addedForeignKeys) === 0
             && count($this->changedForeignKeys) === 0
-            && count($this->removedForeignKeys) === 0;
+            && count($this->removedForeignKeys) === 0
+            && count($this->changedOptions) === 0;
     }
+
+    /* ryunosuke appendix */
+
+    /** @var array All changed table option */
+    public $changedOptions = [];
 }

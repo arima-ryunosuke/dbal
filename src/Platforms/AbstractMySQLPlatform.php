@@ -547,13 +547,6 @@ SQL
 
         $tableOptions = [];
 
-        // Charset
-        if (! isset($options['charset'])) {
-            $options['charset'] = 'utf8';
-        }
-
-        $tableOptions[] = sprintf('DEFAULT CHARACTER SET %s', $options['charset']);
-
         if (isset($options['collate'])) {
             Deprecation::trigger(
                 'doctrine/dbal',
@@ -563,9 +556,17 @@ SQL
             $options['collation'] = $options['collate'];
         }
 
+        // Charset
+        if (! isset($options['charset'])) {
+            $options['charset'] = explode('_', $options['collation'] ?? 'utf8', 2)[0];
+        }
+
+        $tableOptions[] = sprintf('DEFAULT CHARACTER SET %s', $options['charset']);
+
         // Collation
         if (! isset($options['collation'])) {
-            $options['collation'] = $options['charset'] . '_unicode_ci';
+            $unicode = !!preg_match('#^((utf)|(usc))#', $options['charset']);
+            $options['collation'] = $options['charset'] . ($unicode ? '_unicode_ci' : '_bin');
         }
 
         $tableOptions[] = $this->getColumnCollationDeclarationSQL($options['collation']);
@@ -763,9 +764,31 @@ SQL
         $tableSql = [];
 
         if (! $this->onSchemaAlterTable($diff, $tableSql)) {
-            if (count($queryParts) > 0) {
-                $sql[] = 'ALTER TABLE ' . ($diff->getOldTable() ?? $diff->getName($this))->getQuotedName($this) . ' '
-                    . implode(', ', $queryParts);
+            $changedOptions = $diff->changedOptions;
+            unset($changedOptions['autoincrement']);
+            if (count($queryParts) > 0 || $changedOptions) {
+                $query = 'ALTER TABLE ' . ($diff->getOldTable() ?? $diff->getName($this))->getQuotedName($this);
+
+                if (count($queryParts) > 0) {
+                    $query .= ' ' . implode(", ", $queryParts);
+                }
+
+                if ($changedOptions) {
+                    if (count($queryParts) > 0) {
+                        $query .= ',';
+                    }
+                    $changedOptions = [
+                        'table_options' => $changedOptions['table_options'] ?? null,
+                        'engine'        => $changedOptions['engine'] ?? null,
+                        'collation'     => $changedOptions['collation'] ?? null,
+                        'comment'       => $changedOptions['comment'] ?? null,
+                        'row_format'    => $changedOptions['create_options']['row_format'] ?? null,
+                    ];
+                    $changedOptions = array_filter($changedOptions, function ($v) { return $v !== null; });
+                    $query .= ' ' . $this->buildTableOptions($changedOptions);
+                }
+
+                $sql[] = $query;
             }
 
             $sql = array_merge(

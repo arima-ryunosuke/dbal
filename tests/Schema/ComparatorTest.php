@@ -1337,4 +1337,36 @@ class ComparatorTest extends TestCase
 
         self::assertEmpty($diff->orphanedForeignKeys);
     }
+
+    /* ryunosuke appendix */
+
+    public function testTableOptions(): void
+    {
+        $table1 = new Table('foo');
+        $table1->addOption('hoge', 'foo');
+
+        $table2 = new Table('foo');
+        $table2->addOption('hoge', 'bar');
+
+        $tableDiff = $this->comparator->compareTables($table1, $table2);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertEquals(1, count($tableDiff->changedOptions));
+    }
+
+    public function testChangeTableOption(): void
+    {
+        $tableA = new Table('foo');
+        $tableA->addColumn('id', 'integer');
+        $tableA->addOption('comment', 'A-table');
+
+        $tableB = new Table('foo');
+        $tableB->addColumn('id', 'integer');
+        $tableB->addOption('comment', 'B-table');
+
+        $tableDiff = $this->comparator->compareTables($tableA, $tableB);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertArrayHasKey('comment', $tableDiff->changedOptions);
+    }
 }
