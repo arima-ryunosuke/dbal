@@ -22,7 +22,7 @@ class DriverTest extends AbstractSQLServerDriverTestCase
             ]);
             self::fail();
         } catch (\Exception $exception) {
-            self::assertThat($exception->getCode(), self::logicalOr(self::equalTo(53), self::equalTo(64)));
+            self::assertThat($exception->getCode(), self::logicalOr(self::equalTo(53), self::equalTo(64), self::equalTo(67), self::equalTo(258)));
             self::assertLessThan(2.5, microtime(true) - $time);
         }
     }
