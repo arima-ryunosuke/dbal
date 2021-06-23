@@ -1083,4 +1083,12 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
             "ALTER TABLE foo ADD c1 INT NOT NULL FIRST, ADD c3 INT NOT NULL AFTER c2, ADD c4 INT NOT NULL AFTER c3, CHANGE c9 c9 VARCHAR(255) NOT NULL AFTER c4",
         ], $sql);
     }
+
+    public function getGenerateTriggerSql(): array
+    {
+        return [
+            'create' => 'CREATE TRIGGER trg_dummy AFTER INSERT ON test FOR EACH ROW statement',
+            'drop'   => 'DROP TRIGGER trg_dummy',
+        ];
+    }
 }
