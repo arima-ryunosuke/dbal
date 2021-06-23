@@ -4515,4 +4515,27 @@ abstract class AbstractPlatform
     {
         return false;
     }
+
+    /**
+     * Whether this platform supports CREATE OR REPLACE VIEW.
+     *
+     * @return bool
+     */
+    public function supportsReplaceView()
+    {
+        return false;
+    }
+
+    /**
+     * @param string $name
+     * @param string $sql
+     *
+     * @return string
+     *
+     * @throws Exception If not supported on this platform.
+     */
+    public function getReplaceViewSQL($name, $sql)
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
 }

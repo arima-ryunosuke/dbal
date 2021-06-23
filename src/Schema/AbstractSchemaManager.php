@@ -1573,8 +1573,9 @@ abstract class AbstractSchemaManager
         }
 
         $tables = $this->listTables();
+        $views  = $this->listViews();
 
-        return new Schema($tables, $sequences, $this->createSchemaConfig(), $schemaNames);
+        return new Schema($tables, $views, $sequences, $this->createSchemaConfig(), $schemaNames);
     }
 
     /**
