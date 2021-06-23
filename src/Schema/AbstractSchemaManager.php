@@ -408,6 +408,7 @@ abstract class AbstractSchemaManager
         $tableColumnsByTable      = $this->fetchTableColumnsByTable($database);
         $indexColumnsByTable      = $this->fetchIndexColumnsByTable($database);
         $foreignKeyColumnsByTable = $this->fetchForeignKeyColumnsByTable($database);
+        $triggerByTable           = $this->fetchTableTriggerByTable($database);
         $tableOptionsByTable      = $this->fetchTableOptionsByTable($database);
 
         $filter = $this->_conn->getConfiguration()->getSchemaAssetsFilter();
@@ -424,6 +425,7 @@ abstract class AbstractSchemaManager
                 $this->_getPortableTableIndexesList($indexColumnsByTable[$tableName] ?? [], $tableName),
                 [],
                 $this->_getPortableTableForeignKeysList($foreignKeyColumnsByTable[$tableName] ?? []),
+                $this->_getPortableTableTriggersList($triggerByTable[$tableName] ?? []),
                 $tableOptionsByTable[$tableName] ?? [],
             );
         }
@@ -449,7 +451,9 @@ abstract class AbstractSchemaManager
 
         $indexes = $this->listTableIndexes($name);
 
-        return new Table($name, $columns, $indexes, [], $foreignKeys);
+        $triggers = $this->_platform->supportsTriggers() ? $this->listTableTriggers($name) : [];
+
+        return new Table($name, $columns, $indexes, [], $foreignKeys, $triggers);
     }
 
     /**
@@ -471,12 +475,15 @@ abstract class AbstractSchemaManager
             $foreignKeys = [];
         }
 
+        $triggers = $this->_platform->supportsTriggers() ? $this->listTableTriggers($name) : [];
+
         return new Table(
             $name,
             $this->listTableColumns($name, $database),
             $this->listTableIndexes($name),
             [],
             $foreignKeys,
+            $triggers,
             $tableOptionsByTable[$normalizedName] ?? [],
         );
     }
@@ -883,7 +890,7 @@ abstract class AbstractSchemaManager
      */
     public function createTable(Table $table)
     {
-        $createFlags = AbstractPlatform::CREATE_INDEXES | AbstractPlatform::CREATE_FOREIGNKEYS;
+        $createFlags = AbstractPlatform::CREATE_INDEXES | AbstractPlatform::CREATE_FOREIGNKEYS | AbstractPlatform::CREATE_TRIGGERS;
         $this->_execSql($this->_platform->getCreateTableSQL($table, $createFlags));
     }
 
@@ -1713,5 +1720,79 @@ abstract class AbstractSchemaManager
         }
 
         return $data;
+    }
+
+    /* ryunosuke appendix */
+
+    /**
+     * Lists the triggers for the given table.
+     *
+     * @param string      $table    The name of the table.
+     * @param string|null $database
+     *
+     * @return Trigger[]
+     */
+    public function listTableTriggers($table, $database = null)
+    {
+        if ($database === null) {
+            $database = $this->getDatabase(__METHOD__);
+        } else {
+            Deprecation::trigger(
+                'doctrine/dbal',
+                'https://github.com/doctrine/dbal/issues/5284',
+                'Passing $database to AbstractSchemaManager::listTableTriggers() is deprecated.',
+            );
+        }
+
+        return $this->_getPortableTableTriggersList(
+            $this->selectTableTriggers(
+                $database,
+                $this->normalizeName($table),
+            )->fetchAllAssociative(),
+        );
+    }
+
+    /**
+     * @param mixed[][] $tableTriggers
+     *
+     * @return Trigger[]
+     */
+    protected function _getPortableTableTriggersList($tableTriggers)
+    {
+        $list = [];
+        foreach ($tableTriggers as $value) {
+            $value = $this->_getPortableTableTriggerDefinition($value);
+
+            if (! $value) {
+                continue;
+            }
+
+            $list[] = $value;
+        }
+
+        return $list;
+    }
+
+    /**
+     * @param mixed $tableTrigger
+     *
+     * @return Trigger
+     */
+    protected function _getPortableTableTriggerDefinition($tableTrigger)
+    {
+        return $tableTrigger;
+    }
+
+    protected function fetchTableTriggerByTable(string $databaseName): array
+    {
+        if (!$this->_platform->supportsTriggers()) {
+            return [];
+        }
+        return $this->fetchAllAssociativeGrouped($this->selectTableTriggers($databaseName));
+    }
+
+    protected function selectTableTriggers(string $databaseName, ?string $tableName = null): Result
+    {
+        throw Exception::notSupported(__METHOD__);
     }
 }

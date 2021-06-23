@@ -1076,6 +1076,7 @@ class SqlitePlatform extends AbstractPlatform
                 $this->getPrimaryIndexInAlteredTable($diff, $fromTable),
                 [],
                 $this->getForeignKeysInAlteredTable($diff, $fromTable),
+                [],
                 $fromTable->getOptions(),
             );
             $newTable->addOption('alter', true);

@@ -152,4 +152,25 @@ class TableDiff
 
     /** @var array All changed table option */
     public $changedOptions = [];
+
+    /**
+     * All added trigger
+     *
+     * @var Trigger[]
+     */
+    public $addedTriggers = [];
+
+    /**
+     * All changed trigger
+     *
+     * @var Trigger[]
+     */
+    public $changedTriggers = [];
+
+    /**
+     * All removed trigger
+     *
+     * @var Trigger[]|string[]
+     */
+    public $removedTriggers = [];
 }
