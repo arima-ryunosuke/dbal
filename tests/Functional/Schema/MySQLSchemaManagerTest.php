@@ -298,6 +298,23 @@ class MySQLSchemaManagerTest extends SchemaManagerFunctionalTestCase
         self::assertInstanceOf(BlobType::class, $columns['baz']->getType());
     }
 
+    public function testColumnPosition(): void
+    {
+        $table = new Table('test_position');
+        $table->addColumn('id', 'integer');
+        $table->addColumn('text', 'text');
+        $table->addColumn('foo', 'text');
+        $table->addColumn('bar', 'text');
+        $this->schemaManager->dropAndCreateTable($table);
+
+        $columns = $this->schemaManager->listTableColumns('test_position');
+
+        self::assertArrayNotHasKey('beforeColumn', $columns['id']->getPlatformOptions());
+        self::assertEquals('id', $columns['text']->getPlatformOption('beforeColumn'));
+        self::assertEquals('text', $columns['foo']->getPlatformOption('beforeColumn'));
+        self::assertEquals('foo', $columns['bar']->getPlatformOption('beforeColumn'));
+    }
+
     public function testListLobTypeColumns(): void
     {
         $tableName = 'lob_type_columns';
