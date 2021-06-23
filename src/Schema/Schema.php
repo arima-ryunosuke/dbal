@@ -48,6 +48,9 @@ class Schema extends AbstractAsset
     /** @var Table[] */
     protected $_tables = [];
 
+    /** @var View[] */
+    protected $_views = [];
+
     /** @var Sequence[] */
     protected $_sequences = [];
 
@@ -56,6 +59,7 @@ class Schema extends AbstractAsset
 
     /**
      * @param Table[]    $tables
+     * @param View[]     $views
      * @param Sequence[] $sequences
      * @param string[]   $namespaces
      *
@@ -63,6 +67,7 @@ class Schema extends AbstractAsset
      */
     public function __construct(
         array $tables = [],
+        array $views = [],
         array $sequences = [],
         ?SchemaConfig $schemaConfig = null,
         array $namespaces = []
@@ -80,6 +85,10 @@ class Schema extends AbstractAsset
 
         foreach ($tables as $table) {
             $this->_addTable($table);
+        }
+
+        foreach ($views as $view) {
+            $this->_addView($view);
         }
 
         foreach ($sequences as $sequence) {
@@ -119,6 +128,31 @@ class Schema extends AbstractAsset
 
         $this->_tables[$tableName] = $table;
         $table->setSchemaConfig($this->_schemaConfig);
+    }
+
+    /**
+     * @return void
+     *
+     * @throws SchemaException
+     */
+    protected function _addView(View $view)
+    {
+        $namespaceName = $view->getNamespaceName();
+        $viewName      = $view->getFullQualifiedName($this->getName());
+
+        if (isset($this->_views[$viewName])) {
+            throw SchemaException::viewAlreadyExists($viewName);
+        }
+
+        if (
+            $namespaceName !== null
+            && ! $view->isInDefaultNamespace($this->getName())
+            && ! $this->hasNamespace($namespaceName)
+        ) {
+            $this->createNamespace($namespaceName);
+        }
+
+        $this->_views[$viewName] = $view;
     }
 
     /**
@@ -254,6 +288,57 @@ class Schema extends AbstractAsset
     }
 
     /**
+     * Gets all views of this schema.
+     *
+     * @return View[]
+     */
+    public function getViews()
+    {
+        return $this->_views;
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return View
+     *
+     * @throws SchemaException
+     */
+    public function getView($name)
+    {
+        $name = $this->getFullQualifiedAssetName($name);
+        if (! isset($this->_views[$name])) {
+            throw SchemaException::viewDoesNotExist($name);
+        }
+
+        return $this->_views[$name];
+    }
+
+    /**
+     * Does this schema have a view with the given name?
+     *
+     * @param string $name
+     *
+     * @return bool
+     */
+    public function hasView($name)
+    {
+        $name = $this->getFullQualifiedAssetName($name);
+
+        return isset($this->_views[$name]);
+    }
+
+    /**
+     * Gets all view names, prefixed with a schema name, even the default one if present.
+     *
+     * @return string[]
+     */
+    public function getViewNames()
+    {
+        return array_keys($this->_views);
+    }
+
+    /**
      * @param string $name
      *
      * @return bool
@@ -368,6 +453,57 @@ class Schema extends AbstractAsset
         $name = $this->getFullQualifiedAssetName($name);
         $this->getTable($name);
         unset($this->_tables[$name]);
+
+        return $this;
+    }
+
+    /**
+     * Creates a new view.
+     *
+     * @param string $name
+     * @param string $sql
+     *
+     * @return View
+     */
+    public function createView($name, $sql)
+    {
+        $view = new View($name, $sql);
+        $this->_addView($view);
+
+        return $view;
+    }
+
+    /**
+     * Renames a view.
+     *
+     * @param string $oldName
+     * @param string $newName
+     *
+     * @throws SchemaException
+     */
+    public function renameView($oldName, $newName)
+    {
+        $view = $this->getView($oldName);
+        $view->_setName($newName);
+
+        $this->dropView($oldName);
+        $this->_addView($view);
+
+        return $this;
+    }
+
+    /**
+     * Drops a view from the schema.
+     *
+     * @param string $name
+     *
+     * @throws SchemaException
+     */
+    public function dropView($name)
+    {
+        $name = $this->getFullQualifiedAssetName($name);
+        $this->getView($name);
+        unset($this->_views[$name]);
 
         return $this;
     }
@@ -491,6 +627,10 @@ class Schema extends AbstractAsset
 
         foreach ($this->_sequences as $k => $sequence) {
             $this->_sequences[$k] = clone $sequence;
+        }
+
+        foreach ($this->_views as $k => $view) {
+            $this->_views[$k] = clone $view;
         }
     }
 }

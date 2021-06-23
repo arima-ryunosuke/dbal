@@ -1123,6 +1123,12 @@ abstract class AbstractSchemaManager
             $schemaNames = $this->listNamespaceNames();
         }
 
+        $views = [];
+
+        if ($this->_platform->supportsViews()) {
+            $views = $this->listViews();
+        }
+
         $sequences = [];
 
         if ($this->_platform->supportsSequences()) {
@@ -1131,7 +1137,7 @@ abstract class AbstractSchemaManager
 
         $tables = $this->listTables();
 
-        return new Schema($tables, $sequences, $this->createSchemaConfig(), $schemaNames);
+        return new Schema($tables, $views, $sequences, $this->createSchemaConfig(), $schemaNames);
     }
 
     /**
