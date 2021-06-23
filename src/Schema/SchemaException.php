@@ -199,4 +199,29 @@ class SchemaException extends Exception
             sprintf("Alter table change not supported, given '%s'", $changeName)
         );
     }
+
+    /* ryunosuke appendix */
+
+    public const VIEW_DOESNT_EXIST   = 1010;
+    public const VIEW_ALREADY_EXISTS = 1020;
+
+    /**
+     * @param string $viewName
+     *
+     * @return \Doctrine\DBAL\Schema\SchemaException
+     */
+    public static function viewDoesNotExist($viewName)
+    {
+        return new self("There is no view with name '" . $viewName . "' in the schema.", self::VIEW_DOESNT_EXIST);
+    }
+
+    /**
+     * @param string $viewName
+     *
+     * @return \Doctrine\DBAL\Schema\SchemaException
+     */
+    public static function viewAlreadyExists($viewName)
+    {
+        return new self("The view with name '" . $viewName . "' already exists.", self::VIEW_ALREADY_EXISTS);
+    }
 }
