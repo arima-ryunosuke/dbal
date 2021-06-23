@@ -1602,6 +1602,8 @@ abstract class AbstractSchemaManager
 
         $schemaConfig->setDefaultTableOptions($params['defaultTableOptions']);
 
+        $schemaConfig->setOrderedColumn($this->_platform->supportsOrderedColumn());
+
         return $schemaConfig;
     }
 

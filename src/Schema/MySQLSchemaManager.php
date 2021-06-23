@@ -435,7 +435,7 @@ SQL;
             $params[]     = $tableName;
         }
 
-        $sql .= ' WHERE ' . implode(' AND ', $conditions) . ' ORDER BY ORDINAL_POSITION';
+        $sql .= ' WHERE ' . implode(' AND ', $conditions) . ' ORDER BY c.TABLE_NAME, ORDINAL_POSITION';
 
         return $this->_conn->executeQuery($sql, $params);
     }
@@ -575,5 +575,26 @@ SQL;
         }
 
         return $options;
+    }
+
+    /* ryunosuke appendix */
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function _getPortableTableColumnList($table, $database, $tableColumns)
+    {
+        $columns = parent::_getPortableTableColumnList($table, $database, $tableColumns);
+
+        $before = null;
+        foreach ($columns as $n => $column) {
+            if ($before !== null) {
+                $column->setPlatformOption('beforeColumn', $before);
+            }
+
+            $before = $n;
+        }
+
+        return $columns;
     }
 }

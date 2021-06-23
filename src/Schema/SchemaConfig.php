@@ -117,4 +117,19 @@ class SchemaConfig
     {
         $this->defaultTableOptions = $defaultTableOptions;
     }
+
+    /* ryunosuke appendix */
+
+    /** @var bool */
+    protected $orderedColumn;
+
+    public function getOrderedColumn()
+    {
+        return $this->orderedColumn;
+    }
+
+    public function setOrderedColumn(bool $ordered)
+    {
+        $this->orderedColumn = $ordered;
+    }
 }
