@@ -11,7 +11,7 @@ class SchemaTest extends FunctionalTestCase
 {
     public function testSchemaName(): void
     {
-        $schema = new Schema([], [], $this->connection->createSchemaManager()->createSchemaConfig());
+        $schema = new Schema([], [], [], $this->connection->createSchemaManager()->createSchemaConfig());
         self::assertNotEmpty($schema->getName());
     }
 }
