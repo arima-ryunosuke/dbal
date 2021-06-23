@@ -9,6 +9,7 @@ use Doctrine\DBAL\Driver\API\ExceptionConverter;
 use Doctrine\DBAL\Driver\API\MySQL;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MariaDb1027Platform;
+use Doctrine\DBAL\Platforms\MySQL56Platform;
 use Doctrine\DBAL\Platforms\MySQL57Platform;
 use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
@@ -46,10 +47,11 @@ class AbstractMySQLDriverTest extends AbstractDriverTest
     protected function getDatabasePlatformsForVersions(): array
     {
         return [
-            ['5.6.9', MySQLPlatform::class],
+            ['5.6.3', MySQLPlatform::class],
+            ['5.6.4', MySQL56Platform::class],
             ['5.7', MySQL57Platform::class],
-            ['5.7.0', MySQLPlatform::class],
-            ['5.7.8', MySQLPlatform::class],
+            ['5.7.0', MySQL56Platform::class],
+            ['5.7.8', MySQL56Platform::class],
             ['5.7.9', MySQL57Platform::class],
             ['5.7.10', MySQL57Platform::class],
             ['8', MySQL80Platform::class],

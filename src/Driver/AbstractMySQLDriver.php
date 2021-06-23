@@ -8,6 +8,7 @@ use Doctrine\DBAL\Driver\API\MySQL;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MariaDb1027Platform;
+use Doctrine\DBAL\Platforms\MySQL56Platform;
 use Doctrine\DBAL\Platforms\MySQL57Platform;
 use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
@@ -43,6 +44,10 @@ abstract class AbstractMySQLDriver implements VersionAwarePlatformDriver
 
             if (version_compare($oracleMysqlVersion, '5.7.9', '>=')) {
                 return new MySQL57Platform();
+            }
+
+            if (version_compare($oracleMysqlVersion, '5.6.4', '>=')) {
+                return new MySQL56Platform();
             }
         }
 

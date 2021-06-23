@@ -11,7 +11,7 @@ use Doctrine\Deprecations\Deprecation;
 /**
  * Provides the behavior, features and SQL dialect of the MySQL 5.7 (5.7.9 GA) database platform.
  */
-class MySQL57Platform extends MySQLPlatform
+class MySQL57Platform extends MySQL56Platform
 {
     /**
      * {@inheritdoc}
