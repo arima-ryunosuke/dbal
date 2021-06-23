@@ -123,7 +123,7 @@ class SchemaConfig
     /* ryunosuke appendix */
 
     /** @var bool */
-    protected $orderedColumn = [];
+    protected $orderedColumn;
 
     public function getOrderedColumn()
     {

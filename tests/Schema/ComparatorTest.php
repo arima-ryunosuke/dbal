@@ -1316,4 +1316,22 @@ class ComparatorTest extends TestCase
             'Schema diff is empty, since only `columnDefinition` changed from `null` (not detected) to a defined one'
         );
     }
+
+    /* ryunosuke appendix */
+
+    public function testChangeTableOption(): void
+    {
+        $tableA = new Table('foo');
+        $tableA->addColumn('id', 'integer');
+        $tableA->addOption('comment', 'A-table');
+
+        $tableB = new Table('foo');
+        $tableB->addColumn('id', 'integer');
+        $tableB->addOption('comment', 'B-table');
+
+        $tableDiff = $this->comparator->diffTable($tableA, $tableB);
+
+        self::assertInstanceOf(TableDiff::class, $tableDiff);
+        self::assertArrayHasKey('comment', $tableDiff->changedOptions);
+    }
 }
