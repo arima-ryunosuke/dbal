@@ -615,6 +615,21 @@ class ComparatorTest extends TestCase
         self::assertCount(1, $tableDiff->changedForeignKeys);
     }
 
+    public function testTableOptions(): void
+    {
+        $table1 = new Table("foo");
+        $table1->addOption('hoge', 'foo');
+
+        $table2 = new Table("foo");
+        $table2->addOption('hoge', 'bar');
+
+        $c = new Comparator();
+        $tableDiff = $c->diffTable($table1, $table2);
+
+        self::assertInstanceOf('Doctrine\DBAL\Schema\TableDiff', $tableDiff);
+        self::assertEquals(1, count($tableDiff->changedOptions));
+    }
+
     public function testTablesCaseInsensitive(): void
     {
         $schemaA = new Schema();

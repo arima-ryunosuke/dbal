@@ -375,6 +375,10 @@ class MySQLSchemaManagerTest extends SchemaManagerFunctionalTestCase
     {
         $offlineTable = new Table('list_guid_table_column');
         $offlineTable->addColumn('col_guid', 'guid');
+        $offlineTable->addOption('engine', 'InnoDB');
+        $offlineTable->addOption('collation', 'utf8_unicode_ci');
+        $offlineTable->addOption('comment', '');
+        $offlineTable->addOption('create_options', []);
 
         $this->schemaManager->dropAndCreateTable($offlineTable);
 
@@ -447,6 +451,10 @@ class MySQLSchemaManagerTest extends SchemaManagerFunctionalTestCase
         $table->addColumn('col_datetime_nullable', 'datetime', ['default' => $currentTimeStampSql]);
 
         $this->schemaManager->dropAndCreateTable($table);
+        $table->addOption('engine', 'InnoDB');
+        $table->addOption('collation', 'utf8_unicode_ci');
+        $table->addOption('comment', '');
+        $table->addOption('create_options', []);
 
         $onlineTable = $this->schemaManager->listTableDetails('test_column_defaults_current_timestamp');
         self::assertSame($currentTimeStampSql, $onlineTable->getColumn('col_datetime')->getDefault());

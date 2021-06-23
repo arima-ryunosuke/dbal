@@ -368,6 +368,10 @@ abstract class SchemaManagerFunctionalTestCase extends FunctionalTestCase
         }
 
         $offlineTable = $this->createListTableColumns();
+        $offlineTable->addOption('engine', 'InnoDB');
+        $offlineTable->addOption('collation', 'utf8_unicode_ci');
+        $offlineTable->addOption('comment', '');
+        $offlineTable->addOption('create_options', []);
         $this->schemaManager->dropAndCreateTable($offlineTable);
         $onlineTable = $this->schemaManager->listTableDetails('list_table_columns');
 

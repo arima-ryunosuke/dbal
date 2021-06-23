@@ -92,6 +92,13 @@ class TableDiff
      */
     public $removedForeignKeys = [];
 
+    /**
+     * All changed table option
+     *
+     * @var array
+     */
+    public $changedOptions = [];
+
     /** @var Table|null */
     public $fromTable;
 
