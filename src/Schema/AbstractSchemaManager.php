@@ -1028,6 +1028,9 @@ abstract class AbstractSchemaManager
                 $options = [
                     'lengths' => [],
                 ];
+                if (isset($tableIndex['options'])) {
+                    $options += $tableIndex['options'];
+                }
 
                 if (isset($tableIndex['where'])) {
                     $options['where'] = $tableIndex['where'];

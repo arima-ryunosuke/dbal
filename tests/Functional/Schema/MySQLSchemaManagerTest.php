@@ -77,7 +77,7 @@ class MySQLSchemaManagerTest extends SchemaManagerFunctionalTestCase
     {
         $table = new Table('fulltext_index');
         $table->addColumn('text', 'text');
-        $table->addIndex(['text'], 'f_index');
+        $table->addIndex(['text'], 'f_index', [], ['parser' => 'ngram']);
         $table->addOption('engine', 'MyISAM');
 
         $index = $table->getIndex('f_index');
@@ -88,6 +88,7 @@ class MySQLSchemaManagerTest extends SchemaManagerFunctionalTestCase
         $indexes = $this->schemaManager->listTableIndexes('fulltext_index');
         self::assertArrayHasKey('f_index', $indexes);
         self::assertTrue($indexes['f_index']->hasFlag('fulltext'));
+        self::assertEquals('ngram', $indexes['f_index']->getOption('parser'));
     }
 
     public function testSpatialIndex(): void
