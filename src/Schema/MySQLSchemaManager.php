@@ -128,6 +128,12 @@ class MySQLSchemaManager extends AbstractSchemaManager
 
             if (strpos($v['index_type'], 'FULLTEXT') !== false) {
                 $v['flags'] = ['FULLTEXT'];
+                $creation = $this->_conn->fetchAssociative("SHOW CREATE TABLE $tableName")['Create Table'];
+                if (preg_match("#`" . preg_quote($v['key_name'], '#') . "`.*?50100 WITH PARSER `(.+)`#i", $creation, $matches)) {
+                    $v['options'] = [
+                        'parser' => $matches[1],
+                    ];
+                }
             } elseif (strpos($v['index_type'], 'SPATIAL') !== false) {
                 $v['flags'] = ['SPATIAL'];
             }
