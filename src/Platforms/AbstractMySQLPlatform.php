@@ -1492,6 +1492,34 @@ SQL
     /**
      * {@inheritdoc}
      */
+    public function getIndexDeclarationSQL($name, Index $index)
+    {
+        $sql = parent::getIndexDeclarationSQL($name, $index);
+
+        if ($index->hasFlag('fulltext') && $index->hasOption('parser')) {
+            $sql .= ' WITH PARSER ' . $index->getOption('parser');
+        }
+
+        return $sql;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getCreateIndexSQL(Index $index, $table)
+    {
+        $sql = parent::getCreateIndexSQL($index, $table);
+
+        if ($index->hasFlag('fulltext') && $index->hasOption('parser')) {
+            $sql .= ' WITH PARSER ' . $index->getOption('parser');
+        }
+
+        return $sql;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function supportsOrderedColumn(): bool
     {
         return true;

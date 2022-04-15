@@ -734,6 +734,19 @@ class Comparator
      */
     public function diffIndex(Index $index1, Index $index2)
     {
-        return ! ($index1->isFulfilledBy($index2) && $index2->isFulfilledBy($index1));
+        if (! ($index1->isFulfilledBy($index2) && $index2->isFulfilledBy($index1))) {
+            return true;
+        }
+
+        $option1 = $index1->getOptions();
+        $option2 = $index2->getOptions();
+        unset($option1['lengths']);
+        unset($option2['lengths']);
+
+        if ($option1 != $option2) {
+            return true;
+        }
+
+        return false;
     }
 }
