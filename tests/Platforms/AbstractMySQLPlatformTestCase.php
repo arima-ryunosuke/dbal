@@ -202,6 +202,10 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         self::assertEquals('DATETIME', $this->platform->getDateTimeTypeDeclarationSQL(['version' => false]));
         self::assertEquals('TIMESTAMP', $this->platform->getDateTimeTypeDeclarationSQL(['version' => true]));
         self::assertEquals('DATETIME', $this->platform->getDateTimeTypeDeclarationSQL([]));
+
+        self::assertEquals('DATETIME(6)', $this->platform->getDateTimeTypeDeclarationSQL(['version' => false, 'length' => 6]));
+        self::assertEquals('TIMESTAMP(6)', $this->platform->getDateTimeTypeDeclarationSQL(['version' => true, 'length' => 6]));
+        self::assertEquals('TIME(6)', $this->platform->getTimeTypeDeclarationSQL(['length' => 6]));
     }
 
     /** @return string[] */

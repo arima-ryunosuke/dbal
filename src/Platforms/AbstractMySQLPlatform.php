@@ -181,6 +181,11 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
      */
     public function getDateTimeTypeDeclarationSQL(array $column): string
     {
+        $length = '';
+        if (isset($column['length']) && $column['length']) {
+            $length = '(' . $column['length'] . ')';
+        }
+
         if (isset($column['version']) && $column['version'] === true) {
             Deprecation::trigger(
                 'doctrine/dbal',
@@ -188,10 +193,10 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
                 'The "version" column platform option is deprecated.',
             );
 
-            return 'TIMESTAMP';
+            return 'TIMESTAMP' . $length;
         }
 
-        return 'DATETIME';
+        return 'DATETIME' . $length;
     }
 
     /**
@@ -207,7 +212,12 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
      */
     public function getTimeTypeDeclarationSQL(array $column): string
     {
-        return 'TIME';
+        $length = '';
+        if (isset($column['length']) && $column['length']) {
+            $length = '(' . $column['length'] . ')';
+        }
+
+        return 'TIME' . $length;
     }
 
     /**
