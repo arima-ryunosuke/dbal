@@ -810,7 +810,7 @@ SQL;
                 (match ($type) {
                     Types::ENUM => $columnEditor->setValues(['foo', 'bar']),
                     default => $columnEditor
-                        ->setLength(8)
+                        ->setLength(6)
                         ->setPrecision(8)
                         ->setScale(2),
                 })->create(),
