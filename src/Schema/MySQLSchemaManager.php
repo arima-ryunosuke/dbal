@@ -174,6 +174,15 @@ class MySQLSchemaManager extends AbstractSchemaManager
                 }
 
                 break;
+
+            case 'datetime':
+            case 'time':
+            case 'bit':
+                if (preg_match('#\((\d+)\)$#u', $tableColumn['column_type'], $m)) {
+                    $length = (int) $m[1];
+                }
+
+                break;
         }
 
         switch ($dbType) {
