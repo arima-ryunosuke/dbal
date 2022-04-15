@@ -292,11 +292,16 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
      */
     public function getDateTimeTypeDeclarationSQL(array $column)
     {
-        if (isset($column['version']) && $column['version'] === true) {
-            return 'TIMESTAMP';
+        $length = '';
+        if (isset($column['length']) && $column['length']) {
+            $length = '(' . $column['length'] . ')';
         }
 
-        return 'DATETIME';
+        if (isset($column['version']) && $column['version'] === true) {
+            return 'TIMESTAMP' . $length;
+        }
+
+        return 'DATETIME' . $length;
     }
 
     /**
@@ -312,7 +317,12 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
      */
     public function getTimeTypeDeclarationSQL(array $column)
     {
-        return 'TIME';
+        $length = '';
+        if (isset($column['length']) && $column['length']) {
+            $length = '(' . $column['length'] . ')';
+        }
+
+        return 'TIME' . $length;
     }
 
     /**
