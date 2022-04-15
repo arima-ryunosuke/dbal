@@ -806,7 +806,7 @@ SQL;
                 (match ($type) {
                     Types::ENUM => $columnEditor->setValues(['foo', 'bar']),
                     default => $columnEditor
-                        ->setLength(8)
+                        ->setLength(6)
                         ->setPrecision(8)
                         ->setScale(2),
                 })->create(),
@@ -817,7 +817,7 @@ SQL;
 
         $this->dropAndCreateTable($table);
 
-        $onlineTable = $this->schemaManager->introspectTableByUnquotedName('test_column_introspection');
+        $onlineTable = $this->schemaManager->introspectTable('test_column_introspection');
 
         $diff = $this->schemaManager->createComparator()->compareTables($table, $onlineTable);
 
