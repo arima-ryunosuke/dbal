@@ -349,6 +349,7 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
     {
         return 'SELECT COLUMN_NAME AS Field, COLUMN_TYPE AS Type, IS_NULLABLE AS `Null`, ' .
                'COLUMN_KEY AS `Key`, COLUMN_DEFAULT AS `Default`, EXTRA AS Extra, COLUMN_COMMENT AS Comment, ' .
+               'GENERATION_EXPRESSION AS GenerationExpression, ' .
                'CHARACTER_SET_NAME AS CharacterSet, COLLATION_NAME AS Collation ' .
                'FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ' . $this->getDatabaseNameSQL($database) .
                ' AND TABLE_NAME = ' . $this->quoteStringLiteral($table) .
@@ -1253,6 +1254,47 @@ SQL
 
     public const LENGTH_LIMIT_LONGTEXT = 4294967295;
     public const LENGTH_LIMIT_LONGBLOB = 4294967295;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getColumnDeclarationSQL($name, array $column)
+    {
+        // copy from parent. notice difference of parent
+        if (isset($column['columnDefinition'])) {
+            $declaration = $this->getCustomTypeDeclarationSQL($column);
+        } else {
+            $default = $this->getDefaultValueDeclarationSQL($column);
+
+            $charset = ! empty($column['charset']) ?
+                ' ' . $this->getColumnCharsetDeclarationSQL($column['charset']) : '';
+
+            $collation = ! empty($column['collation']) ?
+                ' ' . $this->getColumnCollationDeclarationSQL($column['collation']) : '';
+
+            $notnull = ! empty($column['notnull']) ? ' NOT NULL' : '';
+
+            $unique = ! empty($column['unique']) ?
+                ' ' . $this->getUniqueFieldDeclarationSQL() : '';
+
+            $check = ! empty($column['check']) ? ' ' . $column['check'] : '';
+
+            $typeDecl    = $column['type']->getSQLDeclaration($column, $this);
+
+            if (empty($column['generation'])) {
+                $declaration = $typeDecl . $charset . $default . $notnull . $unique . $check . $collation;
+            }
+            else {
+                $declaration = $typeDecl . ' AS (' . $column['generation']['expression'] . ') ' . $column['generation']['type'] . $notnull;
+            }
+
+            if ($this->supportsInlineColumnComments() && isset($column['comment']) && $column['comment'] !== '') {
+                $declaration .= ' ' . $this->getInlineColumnCommentSQL($column['comment']);
+            }
+        }
+
+        return $name . ' ' . $declaration;
+    }
 
     /**
      * {@inheritdoc}
