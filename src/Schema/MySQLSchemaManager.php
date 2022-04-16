@@ -290,6 +290,14 @@ class MySQLSchemaManager extends AbstractSchemaManager
             $column->setPlatformOption('collation', $tableColumn['collation']);
         }
 
+        // no check "extra" key. because it contains other "GENERATED" keyword. e.g. "DEFAULT_GENERATED" on DATETIME
+        if (strlen($tableColumn['generationexpression'] ?? '')) {
+            $column->setPlatformOption('generation', [
+                'type'       => strstr($tableColumn['extra'], ' ', true),
+                'expression' => stripslashes($tableColumn['generationexpression']),
+            ]);
+        }
+
         return $column;
     }
 
@@ -422,6 +430,7 @@ SQL;
        c.COLUMN_KEY         AS `key`,
        c.COLUMN_DEFAULT     AS `default`,
        c.EXTRA,
+       c.GENERATION_EXPRESSION AS generationexpression,
        c.COLUMN_COMMENT     AS comment,
        c.CHARACTER_SET_NAME AS characterset,
        c.COLLATION_NAME     AS collation

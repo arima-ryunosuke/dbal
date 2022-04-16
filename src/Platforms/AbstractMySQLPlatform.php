@@ -1396,6 +1396,47 @@ SQL
     /**
      * {@inheritdoc}
      */
+    public function getColumnDeclarationSQL($name, array $column)
+    {
+        // copy from parent. notice difference of parent
+        if (isset($column['columnDefinition'])) {
+            $declaration = $this->getCustomTypeDeclarationSQL($column);
+        } else {
+            $default = $this->getDefaultValueDeclarationSQL($column);
+
+            $charset = ! empty($column['charset']) ?
+                ' ' . $this->getColumnCharsetDeclarationSQL($column['charset']) : '';
+
+            $collation = ! empty($column['collation']) ?
+                ' ' . $this->getColumnCollationDeclarationSQL($column['collation']) : '';
+
+            $notnull = ! empty($column['notnull']) ? ' NOT NULL' : '';
+
+            $unique = ! empty($column['unique']) ?
+                ' ' . $this->getUniqueFieldDeclarationSQL() : '';
+
+            $check = ! empty($column['check']) ? ' ' . $column['check'] : '';
+
+            $typeDecl    = $column['type']->getSQLDeclaration($column, $this);
+
+            if (empty($column['generation'])) {
+                $declaration = $typeDecl . $charset . $default . $notnull . $unique . $check . $collation;
+            }
+            else {
+                $declaration = $typeDecl . ' AS (' . $column['generation']['expression'] . ') ' . $column['generation']['type'] . $notnull;
+            }
+
+            if ($this->supportsInlineColumnComments() && isset($column['comment']) && $column['comment'] !== '') {
+                $declaration .= ' ' . $this->getInlineColumnCommentSQL($column['comment']);
+            }
+        }
+
+        return $name . ' ' . $declaration;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getIndexDeclarationSQL($name, Index $index)
     {
         $sql = parent::getIndexDeclarationSQL($name, $index);
