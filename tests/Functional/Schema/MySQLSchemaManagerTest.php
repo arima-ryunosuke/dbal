@@ -561,4 +561,23 @@ SQL;
         self::assertEquals('text', $columns['foo']->getPlatformOption('beforeColumn'));
         self::assertEquals('foo', $columns['bar']->getPlatformOption('beforeColumn'));
     }
+
+    public function testGeneratedColumn(): void
+    {
+        $table = new Table('test_generated');
+        $table->addColumn('id', 'integer');
+        $table->addColumn('name', 'string');
+        $table->addColumn('idname', 'text')->setPlatformOption('generation', [
+            'type'       => 'STORED',
+            'expression' => 'CONCAT(id, "-", name)',
+        ]);
+        $this->dropAndCreateTable($table);
+
+        $columns = $this->schemaManager->listTableColumns('test_generated');
+
+        self::assertEquals([
+            'type'       => 'STORED',
+            'expression' => "concat(`id`,_utf8mb4'-',`name`)",
+        ], $columns['idname']->getPlatformOptions()['generation']);
+    }
 }

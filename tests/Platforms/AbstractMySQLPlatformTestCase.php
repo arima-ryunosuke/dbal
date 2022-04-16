@@ -13,6 +13,7 @@ use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
 use Doctrine\DBAL\TransactionIsolationLevel;
 
+use Doctrine\DBAL\Types\Type;
 use function array_shift;
 
 /** @extends AbstractPlatformTestCase<MySQLPlatform> */
@@ -1022,5 +1023,31 @@ abstract class AbstractMySQLPlatformTestCase extends AbstractPlatformTestCase
         self::assertEquals([
             "ALTER TABLE foo ADD c1 INT NOT NULL FIRST, ADD c3 INT NOT NULL AFTER c2, ADD c4 INT NOT NULL AFTER c3, CHANGE c9 c9 VARCHAR(255) NOT NULL AFTER c4",
         ], $sql);
+    }
+
+    public function testGeneratedColumn(): void
+    {
+        self::assertEquals(
+            'foo VARCHAR(255) AS (EXPR) STORED',
+            $this->platform->getColumnDeclarationSQL('foo', [
+                'type'       => Type::getType('string'),
+                'generation' => [
+                    'type'       => 'STORED',
+                    'expression' => 'EXPR',
+                ],
+            ])
+        );
+
+        self::assertEquals(
+            'foo INT AS (EXPR) VIRTUAL NOT NULL',
+            $this->platform->getColumnDeclarationSQL('foo', [
+                'type'       => Type::getType('integer'),
+                'notnull'    => true,
+                'generation' => [
+                    'type'       => 'VIRTUAL',
+                    'expression' => 'EXPR',
+                ],
+            ])
+        );
     }
 }
