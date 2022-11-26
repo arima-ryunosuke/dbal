@@ -17,6 +17,8 @@ use function strtolower;
  */
 class Comparator
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\Comparator;
+
     /** @internal The comparator can be only instantiated by a schema manager. */
     public function __construct(
         private readonly AbstractPlatform $platform,
@@ -109,7 +111,7 @@ class Comparator
             $droppedSequences[] = $oldSequence;
         }
 
-        return new SchemaDiff(
+        $diff = new SchemaDiff(
             $createdSchemas,
             $droppedSchemas,
             $createdTables,
@@ -119,6 +121,10 @@ class Comparator
             $alteredSequences,
             $droppedSequences,
         );
+
+        extract($this->intercept(get_defined_vars()));
+
+        return $diff;
     }
 
     private function isAutoIncrementSequenceInSchema(Schema $schema, Sequence $sequence): bool
@@ -193,8 +199,10 @@ class Comparator
 
             $newColumn = $newTable->getColumn($oldColumnName);
 
-            if ($this->columnsEqual($oldColumn, $newColumn)) {
-                continue;
+            if ($this->interrupt(get_defined_vars()) === true) {
+                if ($this->columnsEqual($oldColumn, $newColumn)) {
+                    continue;
+                }
             }
 
             $modifiedColumns[$oldColumnName] = new ColumnDiff($oldColumn, $newColumn);
@@ -298,7 +306,7 @@ class Comparator
             $addedForeignKeys[] = $newForeignKey;
         }
 
-        return new TableDiff(
+        $tableDiff = new TableDiff(
             $oldTable,
             addedColumns: $addedColumns,
             changedColumns: $modifiedColumns,
@@ -310,6 +318,10 @@ class Comparator
             addedForeignKeys: $addedForeignKeys,
             droppedForeignKeys: $droppedForeignKeys,
         );
+
+        extract($this->intercept(get_defined_vars()));
+
+        return $tableDiff;
     }
 
     /**
@@ -458,6 +470,10 @@ class Comparator
      */
     protected function diffIndex(Index $index1, Index $index2): bool
     {
+        if ($this->interrupt(get_defined_vars()) === true) {
+            return true;
+        }
+
         return ! ($index1->isFulfilledBy($index2) && $index2->isFulfilledBy($index1));
     }
 }
