@@ -15,6 +15,9 @@ use function strtolower;
 
 class Index extends AbstractAsset implements Constraint
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\Index;
+
     /**
      * Asset identifier instances of the column names the index is associated with.
      * array($columnName => Identifier)
