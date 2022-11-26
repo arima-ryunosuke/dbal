@@ -23,6 +23,9 @@ use const ARRAY_FILTER_USE_KEY;
  */
 class Table extends AbstractAsset
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\Table;
+
     /** @var Column[] */
     protected $_columns = [];
 
@@ -599,6 +602,8 @@ class Table extends AbstractAsset
         $this->_addIndex($indexCandidate);
         $this->implicitIndexes[$this->normalizeIdentifier($indexName)] = $indexCandidate;
 
+        extract($this->intercept(get_defined_vars()));
+
         return $this;
     }
 
@@ -705,6 +710,10 @@ class Table extends AbstractAsset
      */
     public function getColumns()
     {
+        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
+            return $rupted;
+        }
+
         $primaryKeyColumns = $this->getPrimaryKey() !== null ? $this->getPrimaryKeyColumns() : [];
         $foreignKeyColumns = $this->getForeignKeyColumns();
         $remainderColumns  = $this->filterColumns(

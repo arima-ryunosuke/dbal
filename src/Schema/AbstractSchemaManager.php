@@ -35,6 +35,9 @@ use function strtolower;
  */
 abstract class AbstractSchemaManager
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\AbstractSchemaManager;
+
     /**
      * Holds instance of the Doctrine connection for this schema manager.
      *
@@ -1416,6 +1419,8 @@ abstract class AbstractSchemaManager
             $list[$name] = $column;
         }
 
+        extract($this->intercept(get_defined_vars()));
+
         return $list;
     }
 
@@ -1467,12 +1472,15 @@ abstract class AbstractSchemaManager
                     'primary' => $tableIndex['primary'],
                     'flags' => $tableIndex['flags'] ?? [],
                     'options' => $options,
+                    'tableIndex' => $tableIndex,
                 ];
             }
 
             $result[$keyName]['columns'][]            = $tableIndex['column_name'];
             $result[$keyName]['options']['lengths'][] = $tableIndex['length'] ?? null;
         }
+
+        extract($this->intercept(get_defined_vars(), 'Result'));
 
         $eventManager = $this->_platform->getEventManager();
 
@@ -1513,6 +1521,8 @@ abstract class AbstractSchemaManager
 
             $indexes[$indexKey] = $index;
         }
+
+        extract($this->intercept(get_defined_vars(), 'Index'));
 
         return $indexes;
     }
@@ -1650,7 +1660,11 @@ abstract class AbstractSchemaManager
 
         $tables = $this->listTables();
 
-        return new Schema($tables, $sequences, $this->createSchemaConfig(), $schemaNames);
+        $schema = new Schema($tables, $sequences, $this->createSchemaConfig(), $schemaNames);
+
+        extract($this->intercept(get_defined_vars(), null, 'introspectSchema'));
+
+        return $schema;
     }
 
     /**
@@ -1690,6 +1704,8 @@ abstract class AbstractSchemaManager
         }
 
         $schemaConfig->setDefaultTableOptions($params['defaultTableOptions']);
+
+        extract($this->intercept(get_defined_vars()));
 
         return $schemaConfig;
     }
