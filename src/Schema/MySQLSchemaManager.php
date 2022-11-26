@@ -41,6 +41,8 @@ use const CASE_LOWER;
  */
 class MySQLSchemaManager extends AbstractSchemaManager
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\MySQLSchemaManager;
+
     /** @see https://mariadb.com/kb/en/library/string-literals/#escape-sequences */
     private const MARIADB_ESCAPE_SEQUENCES = [
         '\\0' => "\0",
@@ -76,7 +78,11 @@ class MySQLSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableViewDefinition(array $view): View
     {
-        return new View($view['TABLE_NAME'], $view['VIEW_DEFINITION']);
+        $viewObject = new View($view['TABLE_NAME'], $view['VIEW_DEFINITION']);
+
+        extract($this->intercept(get_defined_vars()));
+
+        return $viewObject;
     }
 
     /**
@@ -227,6 +233,8 @@ class MySQLSchemaManager extends AbstractSchemaManager
         $column = new Column($tableColumn['field'], Type::getType($type), $options);
         $column->setPlatformOption('charset', $tableColumn['characterset']);
         $column->setPlatformOption('collation', $tableColumn['collation']);
+
+        extract($this->intercept(get_defined_vars()));
 
         return $column;
     }
@@ -413,6 +421,8 @@ SQL,
             implode(' AND ', $conditions),
         );
 
+        extract($this->intercept(get_defined_vars()));
+
         return $this->connection->executeQuery($sql, $params);
     }
 
@@ -442,6 +452,8 @@ ORDER BY TABLE_NAME,
 SQL,
             implode(' AND ', $conditions),
         );
+
+        extract($this->intercept(get_defined_vars()));
 
         return $this->connection->executeQuery($sql, $params);
     }
@@ -498,6 +510,8 @@ SQL,
             $params[] = $tableName;
         }
 
+        extract($this->intercept(get_defined_vars(), 'Sql'));
+
         /** @var array<non-empty-string,array<string,mixed>> $metadata */
         $metadata = $this->connection->executeQuery($sql, $params)
             ->fetchAllAssociativeIndexed();
@@ -515,6 +529,8 @@ SQL,
                 'create_options' => $this->parseCreateOptions($data['create_options']),
             ];
         }
+
+        extract($this->intercept(get_defined_vars(), 'TableOptions'));
 
         return $tableOptions;
     }
