@@ -8,4 +8,6 @@ namespace Doctrine\DBAL\Platforms;
  */
 class MySQLPlatform extends AbstractMySQLPlatform
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Platforms\MySQLPlatform;
 }
