@@ -27,6 +27,9 @@ use function strtolower;
  */
 abstract class AbstractSchemaManager
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\AbstractSchemaManager;
+
     /** @param T $platform */
     public function __construct(protected Connection $connection, protected AbstractPlatform $platform)
     {
@@ -673,6 +676,8 @@ abstract class AbstractSchemaManager
             $list[$name] = $column;
         }
 
+        extract($this->intercept(get_defined_vars()));
+
         return $list;
     }
 
@@ -721,12 +726,15 @@ abstract class AbstractSchemaManager
                     'primary' => $tableIndex['primary'],
                     'flags' => $tableIndex['flags'] ?? [],
                     'options' => $options,
+                    'tableIndex' => $tableIndex,
                 ];
             }
 
             $result[$keyName]['columns'][]            = $tableIndex['column_name'];
             $result[$keyName]['options']['lengths'][] = $tableIndex['length'] ?? null;
         }
+
+        extract($this->intercept(get_defined_vars(), 'Result'));
 
         $indexes = [];
         foreach ($result as $indexKey => $data) {
@@ -739,6 +747,8 @@ abstract class AbstractSchemaManager
                 $data['options'],
             );
         }
+
+        extract($this->intercept(get_defined_vars(), 'Index'));
 
         return $indexes;
     }
@@ -801,7 +811,11 @@ abstract class AbstractSchemaManager
 
         $tables = $this->listTables();
 
-        return new Schema($tables, $sequences, $this->createSchemaConfig(), $schemaNames);
+        $schema = new Schema($tables, $sequences, $this->createSchemaConfig(), $schemaNames);
+
+        extract($this->intercept(get_defined_vars()));
+
+        return $schema;
     }
 
     /**
