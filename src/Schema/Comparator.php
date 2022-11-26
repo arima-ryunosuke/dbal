@@ -27,6 +27,9 @@ use function strtolower;
  */
 class Comparator
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\Comparator;
+
     private ?AbstractPlatform $platform;
 
     /** @internal The comparator can be only instantiated by a schema manager. */
@@ -229,6 +232,8 @@ class Comparator
 
         $diff->orphanedForeignKeys = $orphanedForeignKeys;
 
+        extract($this->intercept(get_defined_vars(), null, 'compareSchemas'));
+
         return $diff;
     }
 
@@ -348,8 +353,10 @@ class Comparator
             $changedProperties = $this->diffColumn($column, $toColumn);
 
             if ($this->platform !== null) {
-                if ($this->columnsEqual($column, $toColumn)) {
-                    continue;
+                if ($this->interrupt(get_defined_vars()) === true) {
+                    if ($this->columnsEqual($column, $toColumn)) {
+                        continue;
+                    }
                 }
             } elseif (count($changedProperties) === 0) {
                 continue;
@@ -427,7 +434,7 @@ class Comparator
             $addedForeignKeys[] = $toConstraint;
         }
 
-        return new TableDiff(
+        $tableDiff = new TableDiff(
             $toTable->getName(),
             $addedColumns,
             $modifiedColumns,
@@ -442,6 +449,10 @@ class Comparator
             $renamedColumns,
             $renamedIndexes,
         );
+
+        extract($this->intercept(get_defined_vars()));
+
+        return $tableDiff;
     }
 
     /**
@@ -711,6 +722,10 @@ class Comparator
      */
     public function diffIndex(Index $index1, Index $index2)
     {
+        if ($this->interrupt(get_defined_vars()) === true) {
+            return true;
+        }
+
         return ! ($index1->isFulfilledBy($index2) && $index2->isFulfilledBy($index1));
     }
 }
