@@ -33,6 +33,8 @@ use function substr;
  */
 class ForeignKeyConstraint extends AbstractOptionallyNamedObject
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\ForeignKeyConstraint;
+
     /**
      * Asset identifier instances of the referencing table column names the foreign key constraint is associated with.
      *

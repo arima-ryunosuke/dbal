@@ -36,6 +36,8 @@ use const CASE_LOWER;
  */
 class PostgreSQLSchemaManager extends AbstractSchemaManager
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\PostgreSQLSchemaManager;
+    
     public function createComparator(/* ComparatorConfig $config = new ComparatorConfig() */): Comparator
     {
         return new PostgreSQL\Comparator(

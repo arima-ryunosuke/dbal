@@ -17,6 +17,8 @@ use Doctrine\DBAL\Schema\Exception\InvalidState;
  */
 abstract class AbstractOptionallyNamedObject extends AbstractAsset implements OptionallyNamedObject
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\AbstractOptionallyNamedObject;
+
     /**
      * The name of the database object.
      *

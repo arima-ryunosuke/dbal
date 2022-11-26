@@ -86,6 +86,8 @@ use function strtoupper;
  */
 abstract class AbstractPlatform
 {
+    use \Doctrine\DBAL\Plugin\All\Platforms\AbstractPlatform;
+
     /** @deprecated */
     public const CREATE_INDEXES = 1;
 
@@ -417,6 +419,8 @@ abstract class AbstractPlatform
         }
 
         $dbType = strtolower($dbType);
+
+        extract($this->intercept(get_defined_vars()));
 
         if (! isset($this->doctrineTypeMapping[$dbType])) {
             throw new InvalidArgumentException(sprintf(
@@ -1212,6 +1216,8 @@ abstract class AbstractPlatform
             $sql = array_merge($sql, $this->getAlterTableSQL($tableDiff));
         }
 
+        extract($this->intercept(get_defined_vars()));
+
         return $sql;
     }
 
@@ -1251,20 +1257,14 @@ abstract class AbstractPlatform
         $name    = $index->getQuotedName($this);
         $columns = $index->getColumns();
 
-        if (count($columns) === 0) {
-            throw new InvalidArgumentException(sprintf(
-                'Incomplete or invalid index definition %s on table %s',
-                $name,
-                $table,
-            ));
-        }
-
         if ($index->isPrimary()) {
             return $this->getCreatePrimaryKeySQL($index, $table);
         }
 
         $query  = 'CREATE ' . $this->getCreateIndexSQLFlags($index) . 'INDEX ' . $name . ' ON ' . $table;
         $query .= ' (' . implode(', ', $index->getQuotedColumns($this)) . ')' . $this->getPartialIndexSQL($index);
+
+        extract($this->intercept(get_defined_vars()));
 
         return $query;
     }
@@ -1544,13 +1544,19 @@ abstract class AbstractPlatform
 
             $notnull = ! empty($column['notnull']) ? ' NOT NULL' : '';
 
-            $typeDecl    = $this->getColumnType($column)->getSQLDeclaration($column, $this);
-            $declaration = $typeDecl . $charset . $default . $notnull . $collation;
+            $typeDecl = $this->getColumnType($column)->getSQLDeclaration($column, $this);
+
+            $declaration = $this->interrupt(get_defined_vars());
+            if ($declaration === null) {
+                $declaration = $typeDecl . $charset . $default . $notnull . $collation;
+            }
 
             if ($this->supportsInlineColumnComments() && isset($column['comment']) && $column['comment'] !== '') {
                 $declaration .= ' ' . $this->getInlineColumnCommentSQL($column['comment']);
             }
         }
+
+        extract($this->intercept(get_defined_vars()));
 
         return $name . ' ' . $declaration;
     }
@@ -1741,12 +1747,12 @@ abstract class AbstractPlatform
     {
         $columns = $index->getColumns();
 
-        if (count($columns) === 0) {
-            throw new InvalidArgumentException('Incomplete definition. "columns" required.');
-        }
-
-        return $this->getCreateIndexSQLFlags($index) . 'INDEX ' . $index->getQuotedName($this)
+        $query = $this->getCreateIndexSQLFlags($index) . 'INDEX ' . $index->getQuotedName($this)
             . ' (' . implode(', ', $index->getQuotedColumns($this)) . ')' . $this->getPartialIndexSQL($index);
+
+        extract($this->intercept(get_defined_vars()));
+
+        return $query;
     }
 
     /**
@@ -2028,8 +2034,12 @@ abstract class AbstractPlatform
      */
     abstract public function getListViewsSQL(string $database): string;
 
-    public function getCreateViewSQL(string $name, string $sql): string
+    public function getCreateViewSQL(string $name, string $sql, $options = []): string
     {
+        if (($query = $this->interrupt(get_defined_vars())) !== null) {
+            return $query;
+        }
+
         return 'CREATE VIEW ' . $name . ' AS ' . $sql;
     }
 

@@ -9,6 +9,8 @@ namespace Doctrine\DBAL\Schema;
  */
 class SchemaConfig
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\SchemaConfig;
+
     /** @var positive-int */
     protected int $maxIdentifierLength = 63;
 

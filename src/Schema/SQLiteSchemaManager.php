@@ -42,6 +42,8 @@ use const CASE_LOWER;
  */
 class SQLiteSchemaManager extends AbstractSchemaManager
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\SQLiteSchemaManager;
+
     public function createForeignKey(ForeignKeyConstraint $foreignKey, string $table): void
     {
         $table = $this->introspectTable($table);
@@ -114,6 +116,8 @@ class SQLiteSchemaManager extends AbstractSchemaManager
         if ($dbType === 'char') {
             $fixed = true;
         }
+
+        extract($this->intercept(get_defined_vars()));
 
         $options = [
             'autoincrement' => $tableColumn['autoincrement'],

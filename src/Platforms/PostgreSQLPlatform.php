@@ -44,6 +44,8 @@ use function trim;
  */
 class PostgreSQLPlatform extends AbstractPlatform
 {
+    use \Doctrine\DBAL\Plugin\All\Platforms\PostgreSQLPlatform;
+
     /** @see https://www.postgresql.org/docs/current/collation.html */
     private const DEFAULT_COLLATION = 'default';
 

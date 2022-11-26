@@ -33,6 +33,8 @@ use function strtolower;
  */
 class Index extends AbstractNamedObject
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\Index;
+
     /**
      * Asset identifier instances of the column names the index is associated with.
      *
@@ -91,7 +93,7 @@ class Index extends AbstractNamedObject
         bool $isUnique = false,
         bool $isPrimary = false,
         array $flags = [],
-        private readonly array $options = [],
+        private array $options = [],
     ) {
         parent::__construct($name ?? '');
 
@@ -260,6 +262,8 @@ class Index extends AbstractNamedObject
 
             $columns[] = $quotedColumn;
         }
+
+        extract($this->intercept(get_defined_vars()));
 
         return $columns;
     }
