@@ -11,6 +11,9 @@ use function strcasecmp;
  */
 class ColumnDiff
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\ColumnDiff;
+
     /** @internal The diff can be only instantiated by a {@see Comparator}. */
     public function __construct(private readonly Column $oldColumn, private readonly Column $newColumn)
     {

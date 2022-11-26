@@ -9,9 +9,13 @@ namespace Doctrine\DBAL\Schema;
  */
 class View extends AbstractAsset
 {
-    public function __construct(string $name, private readonly string $sql)
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\View;
+
+    public function __construct(string $name, private readonly string $sql, $options = [])
     {
         $this->_setName($name);
+        extract($this->intercept(get_defined_vars()));
     }
 
     public function getSql(): string

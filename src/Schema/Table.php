@@ -28,6 +28,9 @@ use function strtolower;
  */
 class Table extends AbstractAsset
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\Table;
+
     /** @var Column[] */
     protected array $_columns = [];
 
@@ -711,6 +714,8 @@ class Table extends AbstractAsset
 
         $this->_addIndex($indexCandidate);
         $this->implicitIndexes[$this->normalizeIdentifier($indexName)] = $indexCandidate;
+
+        extract($this->intercept(get_defined_vars()));
 
         return $this;
     }
