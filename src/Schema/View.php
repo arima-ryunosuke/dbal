@@ -15,9 +15,13 @@ use Doctrine\DBAL\Schema\Name\Parsers;
  */
 class View extends AbstractNamedObject
 {
-    public function __construct(string $name, private readonly string $sql)
+    use \Doctrine\DBAL\Plugin\All\Schema\View;
+
+    public function __construct(string $name, private readonly string $sql, $options = [])
     {
         parent::__construct($name);
+
+        extract($this->intercept(get_defined_vars()));
     }
 
     protected function getNameParser(): OptionallyQualifiedNameParser
