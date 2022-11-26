@@ -399,6 +399,8 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
 
             $queryParts[] =  'CHANGE ' . $oldColumn->getQuotedName($this) . ' '
                 . $this->getColumnDeclarationSQL($newColumn->getQuotedName($this), $newColumnProperties);
+
+            extract($this->intercept(get_defined_vars(), 'Column'));
         }
 
         $droppedIndexes = $this->indexIndexesByLowerCaseName($diff->getDroppedIndexes());
@@ -447,9 +449,13 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
             $diff->unsetDroppedIndex($droppedIndexes['primary']);
         }
 
+        extract($this->intercept(get_defined_vars(), 'Option'));
+
         if (count($queryParts) > 0) {
             $tableSql[] = 'ALTER TABLE ' . $diff->getOldTable()->getQuotedName($this) . ' '
                 . implode(', ', $queryParts);
+
+            extract($this->intercept(get_defined_vars(), 'Table'));
         }
 
         return array_merge(
@@ -489,6 +495,8 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
                 $query  = 'ALTER TABLE ' . $tableNameSQL . ' DROP INDEX ' . $droppedIndex->getName() . ', ';
                 $query .= 'ADD ' . $indexClause;
                 $query .= ' (' . implode(', ', $addedIndex->getQuotedColumns($this)) . ')';
+
+                extract($this->intercept(get_defined_vars()));
 
                 $sql[] = $query;
 

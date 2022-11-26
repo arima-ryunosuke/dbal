@@ -19,6 +19,8 @@ use Doctrine\Deprecations\Deprecation;
  */
 class MySQLPlatform extends AbstractMySQLPlatform
 {
+    use \Doctrine\DBAL\Plugin\All\Platforms\MySQLPlatform;
+
     /**
      * {@inheritDoc}
      *
@@ -30,6 +32,10 @@ class MySQLPlatform extends AbstractMySQLPlatform
      */
     public function getDefaultValueDeclarationSQL(array $column): string
     {
+        if (($result = $this->interrupt(get_defined_vars())) !== null) {
+            return $result;
+        }
+
         if ($column['type'] instanceof TextType || $column['type'] instanceof BlobType) {
             unset($column['default']);
         }
