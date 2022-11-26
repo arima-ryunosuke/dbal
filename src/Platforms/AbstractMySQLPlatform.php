@@ -574,7 +574,7 @@ SQL
 
         // Comment
         if (isset($options['comment'])) {
-            $tableOptions[] = sprintf('COMMENT = %s ', $this->quoteStringLiteral($options['comment']));
+            $tableOptions[] = sprintf('COMMENT = %s', $this->quoteStringLiteral($options['comment']));
         }
 
         // Row format
