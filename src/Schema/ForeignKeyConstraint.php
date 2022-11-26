@@ -16,6 +16,9 @@ use function substr;
  */
 class ForeignKeyConstraint extends AbstractAsset implements Constraint
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\ForeignKeyConstraint;
+
     /**
      * Instance of the referencing table the foreign key constraint is associated with.
      *

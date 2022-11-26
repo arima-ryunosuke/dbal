@@ -14,6 +14,9 @@ use function count;
  */
 class TableDiff
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\TableDiff;
+
     /**
      * @deprecated Use {@see getOldTable()} instead.
      *
@@ -346,6 +349,10 @@ class TableDiff
      */
     public function isEmpty(): bool
     {
+        if ($this->interrupt(get_defined_vars()) === false) {
+            return false;
+        }
+
         return count($this->addedColumns) === 0
             && count($this->changedColumns) === 0
             && count($this->removedColumns) === 0

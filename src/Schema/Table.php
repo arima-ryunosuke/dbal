@@ -23,6 +23,9 @@ use const ARRAY_FILTER_USE_KEY;
  */
 class Table extends AbstractAsset
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\Table;
+
     /** @var Column[] */
     protected $_columns = [];
 
@@ -538,10 +541,6 @@ class Table extends AbstractAsset
 
         $this->uniqueConstraints[$name] = $constraint;
 
-        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
-            return $rupted;
-        }
-
         // If there is already an index that fulfills this requirements drop the request. In the case of __construct
         // calling this method during hydration from schema-details all the explicitly added indexes lead to duplicates.
         // This creates computation overhead in this case, however no duplicate indexes are ever added (column based).
@@ -578,10 +577,6 @@ class Table extends AbstractAsset
         $name = $this->normalizeIdentifier($name);
 
         $this->_fkConstraints[$name] = $constraint;
-
-        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
-            return $rupted;
-        }
 
         /* Add an implicit index (defined by the DBAL) on the foreign key
            columns. If there is already a user-defined index that fulfills these
@@ -713,6 +708,10 @@ class Table extends AbstractAsset
      */
     public function getColumns()
     {
+        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
+            return $rupted;
+        }
+
         $primaryKeyColumns = $this->getPrimaryKey() !== null ? $this->getPrimaryKeyColumns() : [];
         $foreignKeyColumns = $this->getForeignKeyColumns();
         $remainderColumns  = $this->filterColumns(
@@ -882,6 +881,11 @@ class Table extends AbstractAsset
     public function getIndex($name)
     {
         $name = $this->normalizeIdentifier($name);
+
+        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
+            return $rupted;
+        }
+
         if (! $this->hasIndex($name)) {
             throw SchemaException::indexDoesNotExist($name, $this->_name);
         }
@@ -892,6 +896,10 @@ class Table extends AbstractAsset
     /** @return Index[] */
     public function getIndexes()
     {
+        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
+            return $rupted;
+        }
+
         return $this->_indexes;
     }
 
