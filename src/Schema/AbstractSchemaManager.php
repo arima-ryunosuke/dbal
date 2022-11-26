@@ -33,6 +33,8 @@ use function strtolower;
  */
 abstract class AbstractSchemaManager
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\AbstractSchemaManager;
+
     /**
      * The current schema name determined from the connection. The <code>null</code> value means that there is no
      * schema currently selected within the connection.
@@ -723,6 +725,7 @@ abstract class AbstractSchemaManager
             $this->platform->getCreateViewSQL(
                 $view->getQuotedName($this->platform),
                 $view->getSql(),
+                $view->getOptions(),
             ),
         );
     }
@@ -818,6 +821,8 @@ abstract class AbstractSchemaManager
             $list[$name] = $column;
         }
 
+        extract($this->intercept(get_defined_vars()));
+
         return $list;
     }
 
@@ -864,12 +869,15 @@ abstract class AbstractSchemaManager
                     'primary' => $row['primary'],
                     'flags' => $row['flags'] ?? [],
                     'options' => $options,
+                    'tableIndex' => $row,
                 ];
             }
 
             $result[$keyName]['columns'][]            = $row['column_name'];
             $result[$keyName]['options']['lengths'][] = $row['length'] ?? null;
         }
+
+        extract($this->intercept(get_defined_vars(), 'Result'));
 
         $indexes = [];
         foreach ($result as $indexKey => $data) {
@@ -882,6 +890,8 @@ abstract class AbstractSchemaManager
                 $data['options'],
             );
         }
+
+        extract($this->intercept(get_defined_vars(), 'Index'));
 
         return $indexes;
     }
@@ -950,7 +960,11 @@ abstract class AbstractSchemaManager
 
         $tables = $this->listTables();
 
-        return new Schema($tables, $sequences, $this->createSchemaConfig(), $schemaNames);
+        $schema = new Schema($tables, $sequences, $this->createSchemaConfig(), $schemaNames);
+
+        extract($this->intercept(get_defined_vars()));
+
+        return $schema;
     }
 
     /**
@@ -974,6 +988,8 @@ abstract class AbstractSchemaManager
         }
 
         $schemaConfig->setDefaultTableOptions($params['defaultTableOptions']);
+
+        extract($this->intercept(get_defined_vars()));
 
         return $schemaConfig;
     }

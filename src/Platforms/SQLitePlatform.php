@@ -49,6 +49,8 @@ use function substr;
  */
 class SQLitePlatform extends AbstractPlatform
 {
+    use \Doctrine\DBAL\Plugin\All\Platforms\SqlitePlatform;
+
     public function __construct()
     {
         parent::__construct(UnquotedIdentifierFolding::NONE);

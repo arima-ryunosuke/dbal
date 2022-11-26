@@ -31,6 +31,8 @@ use const CASE_LOWER;
  */
 class SQLServerSchemaManager extends AbstractSchemaManager
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\SQLServerSchemaManager;
+
     private ?string $databaseCollation = null;
 
     /**

@@ -42,6 +42,8 @@ use function strtolower;
  */
 class Table extends AbstractNamedObject
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\Table;
+
     /** @var Column[] */
     protected array $_columns = [];
 
@@ -721,6 +723,10 @@ class Table extends AbstractNamedObject
     {
         $name = $this->normalizeIdentifier($name);
 
+        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
+            return $rupted;
+        }
+
         if (! $this->hasIndex($name)) {
             throw IndexDoesNotExist::new($name, $this->_name);
         }
@@ -731,6 +737,10 @@ class Table extends AbstractNamedObject
     /** @return array<string, Index> */
     public function getIndexes(): array
     {
+        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
+            return $rupted;
+        }
+
         return $this->_indexes;
     }
 

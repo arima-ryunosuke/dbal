@@ -16,6 +16,8 @@ use Doctrine\DBAL\Schema\Exception\InvalidState;
  */
 abstract class AbstractNamedObject extends AbstractAsset implements NamedObject
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\AbstractNamedObject;
+
     /**
      * The name of the database object.
      *
