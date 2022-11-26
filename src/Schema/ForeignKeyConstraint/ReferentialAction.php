@@ -17,6 +17,8 @@ namespace Doctrine\DBAL\Schema\ForeignKeyConstraint;
  */
 enum ReferentialAction: string
 {
+    use \Doctrine\DBAL\Plugin\All\Schema\ForeignKeyConstraint\ReferentialAction;
+
     case CASCADE     = 'CASCADE';
     case NO_ACTION   = 'NO ACTION';
     case SET_DEFAULT = 'SET DEFAULT';
