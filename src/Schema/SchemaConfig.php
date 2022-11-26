@@ -9,6 +9,9 @@ use Doctrine\Deprecations\Deprecation;
  */
 class SchemaConfig
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\SchemaConfig;
+
     /**
      * @deprecated
      *

@@ -37,6 +37,9 @@ use const CASE_LOWER;
  */
 class PostgreSQLSchemaManager extends AbstractSchemaManager
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\PostgreSQLSchemaManager;
+
     /** @var string[]|null */
     private ?array $existingSchemaPaths = null;
 

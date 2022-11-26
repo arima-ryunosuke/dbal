@@ -11,6 +11,9 @@ use function in_array;
  */
 class ColumnDiff
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\ColumnDiff;
+
     /**
      * @deprecated Use {@see $fromColumn} and {@see Column::getName()} instead.
      *
