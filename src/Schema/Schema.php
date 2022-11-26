@@ -44,6 +44,9 @@ use function strtolower;
  */
 class Schema extends AbstractAsset
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\Schema;
+
     /**
      * The namespaces in this schema.
      *
@@ -370,5 +373,7 @@ class Schema extends AbstractAsset
         foreach ($this->_sequences as $k => $sequence) {
             $this->_sequences[$k] = clone $sequence;
         }
+
+        extract($this->intercept(get_defined_vars()));
     }
 }

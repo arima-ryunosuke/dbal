@@ -41,6 +41,9 @@ use const CASE_LOWER;
  */
 class SQLiteSchemaManager extends AbstractSchemaManager
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\SQLiteSchemaManager;
+
     /**
      * {@inheritDoc}
      */

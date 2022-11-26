@@ -12,6 +12,9 @@ use function count;
  */
 class SchemaDiff
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\SchemaDiff;
+
     /** @var array<TableDiff> */
     private readonly array $alteredTables;
 
@@ -97,6 +100,10 @@ class SchemaDiff
      */
     public function isEmpty(): bool
     {
+        if ($this->interrupt(get_defined_vars()) === false) {
+            return false;
+        }
+
         return count($this->createdSchemas) === 0
             && count($this->droppedSchemas) === 0
             && count($this->createdTables) === 0

@@ -9,6 +9,8 @@ namespace Doctrine\DBAL\Schema;
  */
 class SchemaConfig
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+
     protected int $maxIdentifierLength = 63;
 
     protected ?string $name = null;
