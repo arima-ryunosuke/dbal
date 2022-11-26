@@ -40,6 +40,9 @@ use function trim;
  */
 class PostgreSQLPlatform extends AbstractPlatform
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Platforms\PostgreSQLPlatform;
+
     private bool $useBooleanTrueFalseStrings = true;
 
     /** @var string[][] PostgreSQL booleans literals */

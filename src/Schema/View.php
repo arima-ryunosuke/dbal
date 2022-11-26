@@ -7,6 +7,9 @@ namespace Doctrine\DBAL\Schema;
  */
 class View extends AbstractAsset
 {
+    use \Doctrine\DBAL\Plugin\Pluggable;
+    use \Doctrine\DBAL\Plugin\All\Schema\View;
+
     /** @var string */
     private $sql;
 
@@ -14,10 +17,12 @@ class View extends AbstractAsset
      * @param string $name
      * @param string $sql
      */
-    public function __construct($name, $sql)
+    public function __construct($name, $sql, $options = [])
     {
         $this->_setName($name);
         $this->sql = $sql;
+
+        extract($this->intercept(get_defined_vars()));
     }
 
     /** @return string */

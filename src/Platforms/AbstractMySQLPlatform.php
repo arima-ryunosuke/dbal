@@ -549,6 +549,10 @@ SQL
      */
     public function getDefaultValueDeclarationSQL($column)
     {
+        if (($result = $this->interrupt(get_defined_vars())) !== null) {
+            return $result;
+        }
+
         // Unset the default value if the given column definition does not allow default values.
         if ($column['type'] instanceof TextType || $column['type'] instanceof BlobType) {
             $column['default'] = null;
@@ -693,6 +697,8 @@ SQL
 
             $queryParts[] =  'CHANGE ' . $oldColumn->getQuotedName($this) . ' '
                 . $this->getColumnDeclarationSQL($newColumn->getQuotedName($this), $newColumnProperties);
+
+            extract($this->intercept(get_defined_vars(), 'Column'));
         }
 
         foreach ($diff->getRenamedColumns() as $oldColumnName => $column) {
@@ -756,10 +762,14 @@ SQL
         $sql      = [];
         $tableSql = [];
 
+        extract($this->intercept(get_defined_vars(), 'Option'));
+
         if (! $this->onSchemaAlterTable($diff, $tableSql)) {
             if (count($queryParts) > 0) {
                 $sql[] = 'ALTER TABLE ' . ($diff->getOldTable() ?? $diff->getName($this))->getQuotedName($this) . ' '
                     . implode(', ', $queryParts);
+
+                extract($this->intercept(get_defined_vars(), 'Table'));
             }
 
             $sql = array_merge(
@@ -802,6 +812,8 @@ SQL
                 $query  = 'ALTER TABLE ' . $tableNameSQL . ' DROP INDEX ' . $droppedIndex->getName() . ', ';
                 $query .= 'ADD ' . $indexClause;
                 $query .= ' (' . $this->getIndexFieldDeclarationListSQL($addedIndex) . ')';
+
+                extract($this->intercept(get_defined_vars()));
 
                 $sql[] = $query;
 
