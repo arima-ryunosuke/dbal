@@ -443,12 +443,10 @@ abstract class AbstractMySQLPlatform extends AbstractPlatform
                     continue;
                 }
 
-                $indexClause = 'INDEX ' . $addedIndex->getName();
-
                 if ($addedIndex->isPrimary()) {
                     $indexClause = 'PRIMARY KEY';
-                } elseif ($addedIndex->isUnique()) {
-                    $indexClause = 'UNIQUE INDEX ' . $addedIndex->getName();
+                } else {
+                    $indexClause = $this->getCreateIndexSQLFlags($addedIndex) . 'INDEX ' . $addedIndex->getName();
                 }
 
                 $query  = 'ALTER TABLE ' . $tableNameSQL . ' DROP INDEX ' . $droppedIndex->getName() . ', ';
