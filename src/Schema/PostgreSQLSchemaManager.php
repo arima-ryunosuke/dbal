@@ -268,6 +268,12 @@ SQL,
      */
     protected function _getPortableViewDefinition($view)
     {
+        $currentSchema = $this->getCurrentSchema();
+
+        if ($view['schemaname'] !== $currentSchema) {
+            return false;
+        }
+
         return new View($view['schemaname'] . '.' . $view['viewname'], $view['definition']);
     }
 
