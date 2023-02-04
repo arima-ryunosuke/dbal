@@ -263,6 +263,7 @@ class ExceptionTest extends FunctionalTestCase
         try {
             $schemaManager->createTable($table);
         } finally {
+            $conn->close();
             $this->cleanupReadOnlyFile($filename);
         }
     }
