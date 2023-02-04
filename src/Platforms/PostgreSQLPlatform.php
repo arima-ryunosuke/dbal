@@ -167,7 +167,10 @@ class PostgreSQLPlatform extends AbstractPlatform
                        table_schema AS schemaname,
                        view_definition AS definition
                 FROM   information_schema.views
-                WHERE  view_definition IS NOT NULL';
+                WHERE  view_definition IS NOT NULL
+                AND    table_catalog = ' . $this->quoteStringLiteral($database) . "
+                AND    table_schema NOT LIKE 'pg\_%'
+                AND    table_schema != 'information_schema'";
     }
 
     /** @internal The method should be only used from within the {@see AbstractPlatform} class hierarchy. */
