@@ -29,14 +29,23 @@ use function unlink;
 
 class ConnectionTest extends FunctionalTestCase
 {
+    private string $nesting_db;
+
     use VerifyDeprecations;
 
     private const TABLE = 'connection_test';
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->nesting_db = sys_get_temp_dir() . '/test_nesting.sqlite';
+    }
+
     protected function tearDown(): void
     {
-        if (file_exists('/tmp/test_nesting.sqlite')) {
-            unlink('/tmp/test_nesting.sqlite');
+        if (file_exists($this->nesting_db)) {
+            unlink($this->nesting_db);
         }
 
         $this->markConnectionNotReusable();
@@ -108,7 +117,7 @@ class ConnectionTest extends FunctionalTestCase
         if ($this->connection->getDatabasePlatform() instanceof SqlitePlatform) {
             $params           = $this->connection->getParams();
             $params['memory'] = false;
-            $params['path']   = '/tmp/test_nesting.sqlite';
+            $params['path']   = $this->nesting_db;
 
             $connection = DriverManager::getConnection(
                 $params,
@@ -131,6 +140,8 @@ class ConnectionTest extends FunctionalTestCase
         $connection->rollBack();
 
         self::assertEquals(0, $connection->fetchOne('select count(*) from test_nesting'));
+
+        $connection->close();
     }
 
     public function testTransactionNestingBehaviorWithSavepoints(): void

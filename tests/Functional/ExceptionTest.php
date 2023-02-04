@@ -294,6 +294,7 @@ class ExceptionTest extends FunctionalTestCase
                 $conn->executeStatement($sql);
             }
         } finally {
+            $conn->close();
             $this->cleanupReadOnlyFile($filename);
         }
     }
