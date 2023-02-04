@@ -14,6 +14,24 @@ use Doctrine\DBAL\Types\Types;
 
 class OtherSchemaTest extends FunctionalTestCase
 {
+    private string $nesting_db;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->nesting_db = sys_get_temp_dir() . '/test_other_schema.sqlite';
+    }
+
+    protected function tearDown(): void
+    {
+        if (file_exists($this->nesting_db)) {
+            unlink($this->nesting_db);
+        }
+
+        parent::tearDown();
+    }
+
     public function testATableCanBeCreatedInAnotherSchema(): void
     {
         $databasePlatform = $this->connection->getDatabasePlatform();
@@ -21,7 +39,7 @@ class OtherSchemaTest extends FunctionalTestCase
             self::markTestSkipped('This test requires SQLite');
         }
 
-        $this->connection->executeStatement("ATTACH DATABASE '/tmp/test_other_schema.sqlite' AS other");
+        $this->connection->executeStatement("ATTACH DATABASE '$this->nesting_db' AS other");
 
         $table = Table::editor()
             ->setUnquotedName('test_other_schema', 'other')
@@ -41,9 +59,12 @@ class OtherSchemaTest extends FunctionalTestCase
         self::assertEquals(1, $this->connection->fetchOne('SELECT COUNT(*) FROM other.test_other_schema'));
         $dsnParser   = new DsnParser();
         $connection  = DriverManager::getConnection(
-            $dsnParser->parse('sqlite3:////tmp/test_other_schema.sqlite'),
+            $dsnParser->parse("sqlite3:///$this->nesting_db"),
         );
         $onlineTable = $connection->createSchemaManager()->introspectTableByUnquotedName('test_other_schema');
         self::assertCount(1, $onlineTable->getIndexes());
+
+        $connection->close();
+        $this->connection->close();
     }
 }
