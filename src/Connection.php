@@ -1089,7 +1089,7 @@ class Connection
                     [$sql, $params, $types] = $this->expandArrayParameters($sql, $params, $types);
                 }
 
-                $stmt = $connection->prepare($sql);
+                $stmt = $connection->prepare($sql, $params, $types);
 
                 $this->bindParameters($stmt, $params, $types);
 
@@ -1193,7 +1193,7 @@ class Connection
                     [$sql, $params, $types] = $this->expandArrayParameters($sql, $params, $types);
                 }
 
-                $stmt = $connection->prepare($sql);
+                $stmt = $connection->prepare($sql, $params, $types);
 
                 $this->bindParameters($stmt, $params, $types);
 
