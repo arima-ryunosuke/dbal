@@ -135,7 +135,7 @@ class UniqueConstraint extends AbstractAsset implements Constraint
     /** @return mixed */
     public function getOption(string $name)
     {
-        return $this->options[strtolower($name)];
+        return $this->options[strtolower($name)] ?? null;
     }
 
     /** @return mixed[] */

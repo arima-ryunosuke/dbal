@@ -307,7 +307,7 @@ class Column extends AbstractAsset
      */
     public function getPlatformOption($name)
     {
-        return $this->_platformOptions[$name];
+        return $this->_platformOptions[$name] ?? null;
     }
 
     /** @return string|null */
