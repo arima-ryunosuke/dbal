@@ -325,7 +325,7 @@ class Index extends AbstractAsset implements Constraint
      */
     public function getOption($name)
     {
-        return $this->options[strtolower($name)];
+        return $this->options[strtolower($name)] ?? null;
     }
 
     /** @return mixed[] */
