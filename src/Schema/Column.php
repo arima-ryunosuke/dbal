@@ -320,7 +320,7 @@ class Column extends AbstractNamedObject
     public function getPlatformOption(string $name): mixed
     {
         /** @phpstan-ignore offsetAccess.notFound */
-        return $this->_platformOptions[$name];
+        return $this->_platformOptions[$name] ?? null;
     }
 
     public function getColumnDefinition(): ?string
