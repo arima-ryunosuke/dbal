@@ -924,7 +924,7 @@ class Table extends AbstractAsset
      */
     public function getOption($name)
     {
-        return $this->_options[$name];
+        return $this->_options[$name] ?? null;
     }
 
     /** @return mixed[] */
