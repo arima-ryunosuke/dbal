@@ -539,7 +539,7 @@ class ForeignKeyConstraint extends AbstractOptionallyNamedObject
             __METHOD__,
         );
 
-        return $this->options[$name];
+        return $this->options[$name] ?? null;
     }
 
     /**

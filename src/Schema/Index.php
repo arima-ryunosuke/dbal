@@ -536,7 +536,7 @@ class Index extends AbstractNamedObject
             __METHOD__,
         );
 
-        return $this->options[strtolower($name)];
+        return $this->options[strtolower($name)] ?? null;
     }
 
     /**
