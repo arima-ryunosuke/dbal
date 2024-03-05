@@ -218,7 +218,7 @@ class ForeignKeyConstraint extends AbstractAsset
      */
     public function getOption(string $name): mixed
     {
-        return $this->options[$name];
+        return $this->options[$name] ?? null;
     }
 
     /**
