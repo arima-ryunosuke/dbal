@@ -202,7 +202,7 @@ class Column extends AbstractAsset
 
     public function getPlatformOption(string $name): mixed
     {
-        return $this->_platformOptions[$name];
+        return $this->_platformOptions[$name] ?? null;
     }
 
     public function getColumnDefinition(): ?string
