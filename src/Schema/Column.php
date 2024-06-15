@@ -21,7 +21,7 @@ class Column extends AbstractAsset
 
     protected ?int $_precision = null;
 
-    protected int $_scale = 0;
+    protected ?int $_scale = 0;
 
     protected bool $_unsigned = false;
 
@@ -92,7 +92,7 @@ class Column extends AbstractAsset
         return $this;
     }
 
-    public function setScale(int $scale): self
+    public function setScale(?int $scale): self
     {
         $this->_scale = $scale;
 
