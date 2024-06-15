@@ -59,7 +59,7 @@ class Column extends AbstractNamedObject
 
     protected ?int $_precision = null;
 
-    protected int $_scale = 0;
+    protected ?int $_scale = 0;
 
     protected bool $_unsigned = false;
 
@@ -203,7 +203,7 @@ class Column extends AbstractNamedObject
     }
 
     /** @deprecated since doctrine/dbal 4.5. Use {@see Column::editor()} and {@see ColumnEditor::setScale()} instead. */
-    public function setScale(int $scale): self
+    public function setScale(?int $scale): self
     {
         Deprecation::triggerIfCalledFromOutside(
             'doctrine/dbal',
