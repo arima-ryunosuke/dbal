@@ -21,10 +21,10 @@ class Column extends AbstractAsset
     /** @var int|null */
     protected $_length;
 
-    /** @var int */
+    /** @var int|null */
     protected $_precision = 10;
 
-    /** @var int */
+    /** @var int|null */
     protected $_scale = 0;
 
     /** @var bool */
@@ -120,33 +120,33 @@ class Column extends AbstractAsset
     }
 
     /**
-     * @param int $precision
+     * @param int|null $precision
      *
      * @return Column
      */
     public function setPrecision($precision)
     {
-        if (! is_numeric($precision)) {
-            $precision = 10; // defaults to 10 when no valid precision is given.
+        if ($precision !== null) {
+            $this->_precision = (int) $precision;
+        } else {
+            $this->_precision = null;
         }
-
-        $this->_precision = (int) $precision;
 
         return $this;
     }
 
     /**
-     * @param int $scale
+     * @param int|null $scale
      *
      * @return Column
      */
     public function setScale($scale)
     {
-        if (! is_numeric($scale)) {
-            $scale = 0;
+        if ($scale !== null) {
+            $this->_scale = (int) $scale;
+        } else {
+            $this->_scale = null;
         }
-
-        $this->_scale = (int) $scale;
 
         return $this;
     }
