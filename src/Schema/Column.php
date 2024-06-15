@@ -47,7 +47,7 @@ class Column extends AbstractNamedObject
 
     protected ?int $_precision = null;
 
-    protected int $_scale = 0;
+    protected ?int $_scale = 0;
 
     protected bool $_unsigned = false;
 
@@ -126,7 +126,7 @@ class Column extends AbstractNamedObject
         return $this;
     }
 
-    public function setScale(int $scale): self
+    public function setScale(?int $scale): self
     {
         $this->_scale = $scale;
 
