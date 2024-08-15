@@ -81,6 +81,7 @@ final class Driver extends AbstractPostgreSQLDriver
                 'dbname' => $params['dbname'] ?? 'postgres',
                 'user' => $params['user'] ?? null,
                 'password' => $params['password'] ?? null,
+                'connect_timeout' => $params['timeout'] ?? null,
                 'sslmode' => $params['sslmode'] ?? null,
                 'gssencmode' => $params['gssencmode'] ?? null,
             ],
