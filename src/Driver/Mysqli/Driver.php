@@ -34,6 +34,10 @@ final class Driver extends AbstractMySQLDriver
             $host = $params['host'] ?? null;
         }
 
+        if (! empty($params['timeout'])) {
+            $params['driverOptions'] = array_replace([MYSQLI_OPT_CONNECT_TIMEOUT => $params['timeout']], $params['driverOptions'] ?? []);
+        }
+
         $connection = new mysqli();
 
         foreach ($this->compilePreInitializers($params) as $initializer) {
