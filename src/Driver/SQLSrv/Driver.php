@@ -58,6 +58,10 @@ final class Driver extends AbstractSQLServerDriver
             $driverOptions['ReturnDatesAsStrings'] = 1;
         }
 
+        if (! empty($params['timeout'])) {
+            $driverOptions['LoginTimeout'] = $params['timeout'];
+        }
+
         if (! sqlsrv_configure('WarningsReturnAsErrors', 0)) {
             throw Error::new();
         }
