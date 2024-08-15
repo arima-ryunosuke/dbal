@@ -45,6 +45,10 @@ final class Driver extends AbstractSQLServerDriver
             $driverOptions[PDO::ATTR_PERSISTENT] = true;
         }
 
+        if (! empty($params['timeout'])) {
+            $driverOptions[PDO::ATTR_TIMEOUT] = $params['timeout'];
+        }
+
         foreach (['user', 'password'] as $key) {
             if (isset($params[$key]) && ! is_string($params[$key])) {
                 throw InvalidConfiguration::notAStringOrNull($key, $params[$key]);
