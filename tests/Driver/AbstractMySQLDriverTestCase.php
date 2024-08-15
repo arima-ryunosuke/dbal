@@ -32,4 +32,19 @@ abstract class AbstractMySQLDriverTestCase extends AbstractDriverTestCase
     {
         return new MySQL\ExceptionConverter();
     }
+
+    public function testTimeoutParameter(): void
+    {
+        $time = microtime(true);
+        try {
+            $this->driver->connect([
+                'host'    => '192.0.2.0',
+                'timeout' => 2,
+            ]);
+            self::fail();
+        } catch (\Exception $exception) {
+            self::assertEquals(2002, $exception->getCode());
+            self::assertLessThan(2.5, microtime(true) - $time);
+        }
+    }
 }
