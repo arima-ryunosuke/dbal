@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Doctrine\DBAL\Tests\Driver\SQLSrv;
+namespace Doctrine\DBAL\Tests\Driver\Mysqli;
 
 use Doctrine\DBAL\Driver as DriverInterface;
-use Doctrine\DBAL\Driver\SQLSrv\Driver;
-use Doctrine\DBAL\Tests\Driver\AbstractSQLServerDriverTestCase;
+use Doctrine\DBAL\Driver\Mysqli\Driver;
+use Doctrine\DBAL\Tests\Driver\AbstractDriverTestCase;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 
-#[RequiresPhpExtension('sqlsrv')]
-class DriverTest extends AbstractSQLServerDriverTestCase
+#[RequiresPhpExtension('mysqli')]
+class DriverTest extends AbstractDriverTestCase
 {
     public function testTimeoutParameter(): void
     {
@@ -22,7 +22,7 @@ class DriverTest extends AbstractSQLServerDriverTestCase
             ]);
             self::fail();
         } catch (\Exception $exception) {
-            self::assertThat($exception->getCode(), self::logicalOr(self::equalTo(53), self::equalTo(64)));
+            self::assertEquals(2002, $exception->getCode());
             self::assertLessThan(2.5, microtime(true) - $time);
         }
     }
