@@ -27,6 +27,10 @@ final class Driver extends AbstractPostgreSQLDriver
             $driverOptions[PDO::ATTR_PERSISTENT] = true;
         }
 
+        if (! empty($params['timeout'])) {
+            $driverOptions[PDO::ATTR_TIMEOUT] = $params['timeout'];
+        }
+
         $safeParams = $params;
         unset($safeParams['password'], $safeParams['url']);
 

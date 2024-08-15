@@ -38,4 +38,23 @@ abstract class AbstractSQLServerDriverTestCase extends AbstractDriverTestCase
         $this->expectException(PortWithoutHost::class);
         $this->driver->connect(['port' => 1433]);
     }
+
+    public function testTimeoutParameter(): void
+    {
+        if (!extension_loaded('sqlsrv') || $this->driver instanceof \Doctrine\DBAL\Driver\PDO\SQLSrv\Driver) {
+            self::markTestSkipped();
+        }
+
+        $time = microtime(true);
+        try {
+            $this->driver->connect([
+                'host'    => '192.0.2.0',
+                'timeout' => 2,
+            ]);
+            self::fail();
+        } catch (\Exception $exception) {
+            self::assertEquals(53, $exception->getCode());
+            self::assertLessThan(2.5, microtime(true) - $time);
+        }
+    }
 }
