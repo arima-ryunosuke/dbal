@@ -538,6 +538,10 @@ class Table extends AbstractAsset
 
         $this->uniqueConstraints[$name] = $constraint;
 
+        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
+            return $rupted;
+        }
+
         // If there is already an index that fulfills this requirements drop the request. In the case of __construct
         // calling this method during hydration from schema-details all the explicitly added indexes lead to duplicates.
         // This creates computation overhead in this case, however no duplicate indexes are ever added (column based).
@@ -574,6 +578,10 @@ class Table extends AbstractAsset
         $name = $this->normalizeIdentifier($name);
 
         $this->_fkConstraints[$name] = $constraint;
+
+        if (($rupted = $this->interrupt(get_defined_vars())) !== null) {
+            return $rupted;
+        }
 
         /* Add an implicit index (defined by the DBAL) on the foreign key
            columns. If there is already a user-defined index that fulfills these
