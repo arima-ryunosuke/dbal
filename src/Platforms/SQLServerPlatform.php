@@ -830,8 +830,8 @@ class SQLServerPlatform extends AbstractPlatform
     /** @internal The method should be only used from within the {@see AbstractSchemaManager} class hierarchy. */
     public function getListViewsSQL(string $database): string
     {
-        return "SELECT name, definition FROM sysobjects
-                    INNER JOIN sys.sql_modules ON sysobjects.id = sys.sql_modules.object_id
+        return "SELECT name, definition, SCHEMA_NAME(sys.views.schema_id) as schemaname FROM sys.views
+                    INNER JOIN sys.sql_modules ON sys.views.object_id = sys.sql_modules.object_id
                 WHERE type = 'V' ORDER BY name";
     }
 

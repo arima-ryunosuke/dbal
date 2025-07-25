@@ -262,7 +262,7 @@ SQL,
      */
     protected function _getPortableViewDefinition(array $view): View
     {
-        return new View($view['name'], $view['definition']);
+        return new View($view['schemaname'] . '.' . $view['name'], $view['definition']);
     }
 
     /** @throws Exception */
