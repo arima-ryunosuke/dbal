@@ -192,6 +192,7 @@ class MySQLSchemaManager extends AbstractSchemaManager
                 break;
 
             case 'enum':
+            case 'set':
                 $values = $this->parseEnumExpression($tableColumn['column_type']);
                 break;
         }
