@@ -550,6 +550,11 @@ SQL,
             return null;
         }
 
+        // https://github.com/doctrine/dbal/issues/7021
+        if (! ctype_digit($identifier)) {
+            return $identifier;
+        }
+
         return $this->platform->quoteSingleIdentifier($identifier);
     }
 }
