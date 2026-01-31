@@ -36,7 +36,11 @@ final class Connection implements ConnectionInterface
             return;
         }
 
-        @pg_close($this->connection);
+        // closed connection errors cannot be suppressed with an atmark
+        try {
+            @pg_close($this->connection);
+        } catch (\Throwable) {
+        }
     }
 
     public function prepare(string $sql): Statement
