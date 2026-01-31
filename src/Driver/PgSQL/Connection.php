@@ -33,7 +33,11 @@ final class Connection implements ConnectionInterface
     {
         // @phpstan-ignore isset.initializedProperty
         if (isset($this->connection)) {
-            @pg_close($this->connection);
+            // closed connection errors cannot be suppressed with an atmark
+            try {
+                @pg_close($this->connection);
+            } catch (\Throwable) {
+            }
         }
     }
 
