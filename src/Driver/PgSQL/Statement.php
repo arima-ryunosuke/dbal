@@ -44,10 +44,14 @@ final class Statement implements StatementInterface
             return;
         }
 
-        @pg_query(
-            $this->connection,
-            'DEALLOCATE ' . pg_escape_identifier($this->connection, $this->name),
-        );
+        // closed connection errors cannot be suppressed with an atmark
+        try {
+            @pg_query(
+                $this->connection,
+                'DEALLOCATE ' . pg_escape_identifier($this->connection, $this->name),
+            );
+        } catch (\Throwable) {
+        }
     }
 
     /** {@inheritDoc} */
