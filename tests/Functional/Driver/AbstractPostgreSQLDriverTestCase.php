@@ -6,9 +6,11 @@ namespace Doctrine\DBAL\Tests\Functional\Driver;
 
 use Doctrine\DBAL\Driver\AbstractPostgreSQLDriver;
 
+use Doctrine\DBAL\Tests\TestUtil;
 use function array_key_exists;
 use function microtime;
 use function sprintf;
+use function str_starts_with;
 
 abstract class AbstractPostgreSQLDriverTestCase extends AbstractDriverTestCase
 {
@@ -41,6 +43,7 @@ abstract class AbstractPostgreSQLDriverTestCase extends AbstractDriverTestCase
 
     protected static function getDatabaseNameForConnectionWithoutDatabaseNameParameter(): ?string
     {
-        return 'postgres';
+        $params = TestUtil::getConnectionParams();
+        return str_starts_with($params['driver'], 'pdo') ? $params['user'] : 'postgres';
     }
 }
